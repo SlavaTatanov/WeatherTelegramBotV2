@@ -1,7 +1,7 @@
-from Bot.Database import MongoConnection
+from Bot.Database import mongo_db
 
 
-class UserInfo(MongoConnection):
+class UserInfo:
     """
     Модель описывающая информацию пользователя.
     Предоставляет интерфейс для взаимодействия с БД
@@ -16,13 +16,13 @@ class UserInfo(MongoConnection):
     def __init__(self, user_id: int, places: dict | None = None):
         self._id = user_id
         self.places = places
-        self.__connection = self.get_db()
 
     @classmethod
     def get_user(cls, user_id):
         """
         Запрос пользователя из БД
         """
+        query = mongo_db["user_info"].find_one({"_id": user_id})
         return cls(user_id)
 
     def _get_mongo_dict(self) -> dict:

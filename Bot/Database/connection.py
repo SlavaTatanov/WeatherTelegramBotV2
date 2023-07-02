@@ -1,31 +1,13 @@
-from abc import ABC, abstractmethod
-from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 from Bot.config import MONGO_USER, MONGO_PWD, MONGO_HOST
 
 
-class AbstractMongoConnection(ABC):
+def get_local_mongo_client():
     """
-    Базовый класс для реализации подключения к МонгоДБ
+    Создание локального подключения
     """
-    @staticmethod
-    @abstractmethod
-    def get_db():
-        pass
+    return AsyncIOMotorClient('mongodb://localhost:27017')
 
 
-class LocalMongoConnection(AbstractMongoConnection):
-    """
-    Класс методом подключения MongoDB
-    """
-    @staticmethod
-    def get_db():
-        return MongoClient('mongodb://localhost:27017')
-
-
-class ServerMongoConnection(AbstractMongoConnection):
-    """
-    Класс методом подключения MongoDB
-    """
-    @staticmethod
-    def get_db():
-        return MongoClient(f'mongodb://{MONGO_USER}:{MONGO_PWD}@{MONGO_HOST}:27017')
+def get_server_mongo_client():
+    return AsyncIOMotorClient(f'mongodb://{MONGO_USER}:{MONGO_PWD}@{MONGO_HOST}:27017')
