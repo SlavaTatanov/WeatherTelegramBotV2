@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run weather_telegram_bot_v2
+docker run --name tg_weather weather_telegram_bot_v2

@@ -1,0 +1,5 @@
+TOKEN = ""
+MONGO_HOST = ""
+MONGO_USER = ""
+MONGO_PWD = ""
+DEFAULT_LOCAL_DB = True

@@ -1,1 +1,3 @@
 # WeatherTelegramBotV2
+
+⛅  ⛈  🌧  🌨  🌩  💨

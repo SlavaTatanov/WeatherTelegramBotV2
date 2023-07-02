@@ -1,0 +1,8 @@
+version: '2'
+services:
+  tg_weather_bot_v2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: 'tg_weather_bot'
