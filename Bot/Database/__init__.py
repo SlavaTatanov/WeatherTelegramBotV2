@@ -1,5 +1,5 @@
 from os import getenv
-from Bot.Database.Connection import LocalMongoConnection, ServerMongoConnection
+from Bot.Database.connection import LocalMongoConnection, ServerMongoConnection
 from Bot.config import DEFAULT_LOCAL_DB
 
 
