@@ -1,4 +1,7 @@
 from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher.filters.state import StatesGroup, State
 from os import getenv
 from Bot.config import TOKEN, DEVELOPMENT, TEST_TOKEN
 
@@ -14,5 +17,16 @@ def get_token() -> str:
     return TOKEN
 
 
+storage = MemoryStorage()
+
 bot = Bot(get_token())
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=storage)
+
+
+async def set_commands(disp: Dispatcher):
+    await disp.bot.set_my_commands([BotCommand("weather", "Погода")])
+
+
+# Создаем классы для машины состояний
+class WeatherState(StatesGroup):
+    weather_type = State()

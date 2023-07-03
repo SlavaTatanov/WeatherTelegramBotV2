@@ -13,9 +13,11 @@ class UserInfo:
     Меняем его
     Сохраняем obj.save()
     """
-    def __init__(self, user_id: int, places: dict | None = None):
+    def __init__(self, user_id: int, places: dict | None = None, in_db: bool = False):
         self._id = user_id
         self.places = places
+        # Определяем есть ли этот пользователь в БД
+        self.__in_db = in_db
 
     @classmethod
     def get_user(cls, user_id):
