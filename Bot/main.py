@@ -1,18 +1,15 @@
 from aiogram import executor, types
 from Bot import dp
-from Bot.Database import mongo_client
-from Bot.Database.models import UserInfo
 
 
-@dp.message_handler(content_types=['text'])
-async def send_welcome(message: types.Message):
-    if message.text == 'err':
-        raise SystemExit
-    elif message.text == 'db':
-        await message.reply(f"Подключение к БД {mongo_client}")
-        UserInfo.get_user(12)
-    else:
-        await message.reply("Привет!")
-
+@dp.message_handler(commands=["start"])
+async def start(message: types.Message):
+    """
+    Обработчик команды Старт
+    """
+    answer_for_user = "Здравствуйте, уважаемый пользователь! Я рад приветствовать вас. " \
+                      "Хочу сообщить вам, что в настоящее время бот находится в активной разработке," \
+                      " и скоро он будет доступен для использования. "
+    await message.answer(answer_for_user)
 
 executor.start_polling(dp, skip_updates=True)

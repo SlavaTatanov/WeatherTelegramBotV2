@@ -6,7 +6,9 @@ ENV PYTHONPATH="$PYTHONPATH:/app"
 
 # Настраиваем переменные среды
 # Тут ставим настройку что локальный MongoDB - 0 (false)
+# И для токена по умолчанию, есть тестовый и боевой, если DEVELOPMENT - 0 приложение возьмет боевой
 ENV LOCAL_MONGO=0
+ENV DEVELOPMENT=0
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
