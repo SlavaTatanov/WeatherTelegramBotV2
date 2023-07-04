@@ -29,4 +29,6 @@ async def set_commands(disp: Dispatcher):
 
 # Создаем классы для машины состояний
 class WeatherState(StatesGroup):
+    weather_time = State()
     weather_type = State()
+    weather_place = State()
