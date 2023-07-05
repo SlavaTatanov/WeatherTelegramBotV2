@@ -1,5 +1,5 @@
 from aiogram import types
-from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, HOURLY
+from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, HOURLY, COMMON, TOMORROW
 
 
 def replay_get_location() -> types.ReplyKeyboardMarkup:
@@ -14,12 +14,13 @@ def replay_get_location() -> types.ReplyKeyboardMarkup:
 
 def inline_get_weather_type() -> types.InlineKeyboardMarkup:
     """
-    Клавиатура для выбора погоды
+    Клавиатура для выбора погоды (сегодня, завтра, 5 дней, выходные)
     """
     keyboard = types.InlineKeyboardMarkup(row_width=2)
-    for text, callback in {"Текущая": CURRENT, "На 5 дней": FIVE_DAY, "На выходные": WEEKEND}.items():
-        btn = types.InlineKeyboardButton(text=text, callback_data=callback)
-        keyboard.add(btn)
+    keyboard.row(types.InlineKeyboardButton("Сегодня", callback_data=CURRENT),
+                 types.InlineKeyboardButton("Завтра", callback_data=TOMORROW))
+    keyboard.row(types.InlineKeyboardButton("5 дней", callback_data=FIVE_DAY),
+                 types.InlineKeyboardButton("Выходные", callback_data=WEEKEND))
     return keyboard
 
 
@@ -32,11 +33,13 @@ def inline_get_weather_places(places: dict = None) -> types.InlineKeyboardMarkup
     return keyboard
 
 
-def inline_weather_type():
+def inline_weather_type(weather_type=None):
     """
-    Клавиатура с типами погоды (Краткий прогноз, почасовой)
+    Клавиатура с типами погоды (Краткий прогноз, обычный, почасовой)
     """
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton("Краткий прогноз", callback_data=SHORT))
-    keyboard.add(types.InlineKeyboardButton("Почасовой", callback_data=HOURLY))
+    keyboard.add(types.InlineKeyboardButton("Краткий", callback_data=SHORT))
+    keyboard.add(types.InlineKeyboardButton("Обычный", callback_data=COMMON))
+    if weather_type == CURRENT or weather_type == TOMORROW:
+        keyboard.add(types.InlineKeyboardButton("Почасовой", callback_data=HOURLY))
     return keyboard
