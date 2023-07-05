@@ -10,8 +10,9 @@ def date_formatting(date_for_format: date):
 
 
 class Weather:
-    def __init__(self, coord):
+    def __init__(self, coord, cur_date):
         self.coord = coord
+        self._cur_date = cur_date
 
     async def _request_weather(self, start_date: date, end_date: date):
         """
@@ -32,3 +33,9 @@ class Weather:
             async with session.get(url, params=params) as response:
                 res = await response.json()
                 return res
+
+    def _weekend_days(self):
+        year, week, _ = self._cur_date.isocalendar()
+        saturday = date.fromisocalendar(year, week, 6)
+        sunday = date.fromisocalendar(year, week, 7)
+        return saturday, sunday
