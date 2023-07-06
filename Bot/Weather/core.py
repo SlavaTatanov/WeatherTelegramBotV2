@@ -1,5 +1,17 @@
 from datetime import date
 from aiohttp import ClientSession
+from async_lru import alru_cache
+from Bot.background_task import request_counter
+
+
+def req_counter(fun):
+    """
+    Счетчик запросов к API, отобразит только незакешированные запросы
+    """
+    async def inner(*args, **kwargs):
+        request_counter["counter"] += 1
+        return await fun(*args, **kwargs)
+    return inner
 
 
 def date_formatting(date_for_format: date):
@@ -14,14 +26,17 @@ class Weather:
         self.coord = coord
         self._cur_date = cur_date
 
-    async def _request_weather(self, start_date: date, end_date: date):
+    @staticmethod
+    @alru_cache(maxsize=15)
+    @req_counter
+    async def _request_weather(coord, start_date: date, end_date: date):
         """
         Запрос погоды API
         """
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
-            "latitude": self.coord[0],
-            "longitude": self.coord[1],
+            "latitude": coord[0],
+            "longitude": coord[1],
             "start_date": str(start_date),
             "end_date": str(end_date),
             "hourly": "temperature_2m,precipitation_probability,"
@@ -39,3 +54,4 @@ class Weather:
         saturday = date.fromisocalendar(year, week, 6)
         sunday = date.fromisocalendar(year, week, 7)
         return saturday, sunday
+

@@ -24,7 +24,8 @@ dp = Dispatcher(bot, storage=storage)
 
 
 async def set_commands(disp: Dispatcher):
-    await disp.bot.set_my_commands([BotCommand("weather", "Погода")])
+    await disp.bot.set_my_commands([BotCommand("weather", "Погода"),
+                                    BotCommand("test", "Тест")])
 
 
 # Создаем классы для машины состояний

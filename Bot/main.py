@@ -1,9 +1,12 @@
-from aiogram import executor, types
+from aiogram import types
 from aiogram.dispatcher import FSMContext
-from Bot import dp, bot, set_commands, WeatherState
-from keboards import replay_get_location, inline_get_weather_type, inline_get_weather_places, inline_weather_type
+import asyncio
+from Bot import dp, bot, WeatherState
+from Bot.keboards import replay_get_location, inline_get_weather_type, inline_get_weather_places, inline_weather_type
 from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW
-from Weather.core import date_formatting, Weather
+from Bot.Weather.core import date_formatting, Weather
+from Bot.background_task import back_task
+from datetime import date
 
 
 @dp.message_handler(commands=['start'])
@@ -28,7 +31,7 @@ async def weather(message: types.Message):
 
 
 @dp.callback_query_handler(lambda callback: callback.data in WEATHER_TIMES, state=WeatherState.weather_time)
-async def weather_type(callback: types.CallbackQuery, state: FSMContext):
+async def weather_time(callback: types.CallbackQuery, state: FSMContext):
     """
     Ловим время для которого необходимо узнать погоду и пишем его в контекст
     После запрашиваем тип погоды (почасовая, обычный, краткий прогноз) если погода текущая, либо сразу место.
@@ -75,10 +78,25 @@ async def weather_place(message: types.Message, state: FSMContext):
         await bot.delete_message(data["location_req"]["chat"]["id"], data["location_req"]["message_id"])
 
         lat, lon = message.location.latitude, message.location.longitude
-        res = await Weather((lat, lon))._request_weather(data["start_date"], data["start_date"])
+        res = await Weather((lat, lon), data["start_date"])._request_weather((lat, lon),data["start_date"], data["start_date"])
         await bot.send_message(message.from_user.id, f"{date_formatting(data['start_date'])}\n\n"
                                                      f"{res}")
     await message.delete()
 
 
-executor.start_polling(dp, skip_updates=True, on_startup=set_commands)
+@dp.message_handler(commands=["test"])
+async def test(message: types.Message):
+    print(Weather._request_weather.cache_info())
+    await Weather((55.43, 54.32), date(2023, 7, 6))._request_weather((55.43, 54.32), date(2023, 7, 6),date(2023, 7, 6))
+
+
+# Запускаем бота и фоновую задачу
+async def main():
+    asyncio.create_task(back_task())
+    await dp.start_polling()
+
+# Получаем loop
+loop = asyncio.new_event_loop()
+# Запускаем
+loop.run_until_complete(main())
+
