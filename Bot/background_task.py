@@ -1,6 +1,5 @@
 import asyncio
-
-request_counter = {"counter": 0}
+from Bot.Weather.core import req_counter
 
 
 async def back_task():
@@ -10,4 +9,4 @@ async def back_task():
     """
     while True:
         await asyncio.sleep(20)
-        print(f"Было {request_counter['counter']} запросов к API")
+        print(f"Было {req_counter.storage.get('API_REQ')} запросов к API")

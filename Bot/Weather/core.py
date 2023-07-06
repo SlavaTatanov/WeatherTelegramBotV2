@@ -1,17 +1,22 @@
 from datetime import date
 from aiohttp import ClientSession
 from async_lru import alru_cache
-from Bot.background_task import request_counter
 
 
-def req_counter(fun):
+def req_counter(key):
     """
     Счетчик запросов к API, отобразит только незакешированные запросы
     """
-    async def inner(*args, **kwargs):
-        request_counter["counter"] += 1
-        return await fun(*args, **kwargs)
-    return inner
+    req_counter.storage = {}
+
+    def req_counter_dec(fun):
+        async def inner(*args, **kwargs):
+            counter = req_counter.storage.get(key, 0)
+            counter += 1
+            req_counter.storage[key] = counter
+            return await fun(*args, **kwargs)
+        return inner
+    return req_counter_dec
 
 
 def date_formatting(date_for_format: date):
@@ -28,7 +33,7 @@ class Weather:
 
     @staticmethod
     @alru_cache(maxsize=15)
-    @req_counter
+    @req_counter("API_REQ")
     async def _request_weather(coord, start_date: date, end_date: date):
         """
         Запрос погоды API
@@ -54,4 +59,3 @@ class Weather:
         saturday = date.fromisocalendar(year, week, 6)
         sunday = date.fromisocalendar(year, week, 7)
         return saturday, sunday
-
