@@ -11,6 +11,5 @@ WEATHER_TIMES = [CURRENT, TOMORROW, FIVE_DAY, WEEKEND]
 # Тип погоды, краткий, почасовой
 SHORT = 'short'
 COMMON = 'common'
-HOURLY = 'hourly'
 
-FREQUENCY = [SHORT, COMMON, HOURLY]
+FREQUENCY = [SHORT, COMMON]

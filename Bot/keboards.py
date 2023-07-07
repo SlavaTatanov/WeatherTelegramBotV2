@@ -1,5 +1,5 @@
 from aiogram import types
-from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, HOURLY, COMMON, TOMORROW
+from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, COMMON, TOMORROW
 
 
 def replay_get_location() -> types.ReplyKeyboardMarkup:
@@ -40,6 +40,4 @@ def inline_weather_type(weather_type=None):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton("Краткий", callback_data=SHORT))
     keyboard.add(types.InlineKeyboardButton("Обычный", callback_data=COMMON))
-    if weather_type == CURRENT or weather_type == TOMORROW:
-        keyboard.add(types.InlineKeyboardButton("Почасовой", callback_data=HOURLY))
     return keyboard

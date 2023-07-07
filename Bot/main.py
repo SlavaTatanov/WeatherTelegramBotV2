@@ -3,8 +3,8 @@ from aiogram.dispatcher import FSMContext
 import asyncio
 from Bot import dp, bot, WeatherState
 from Bot.keboards import replay_get_location, inline_get_weather_type, inline_get_weather_places, inline_weather_type
-from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW
-from Bot.Weather.core import date_formatting, Weather
+from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT
+from Bot.Weather.core import Weather
 from Bot.background_task import back_task
 from datetime import date
 
@@ -78,16 +78,20 @@ async def weather_place(message: types.Message, state: FSMContext):
         await bot.delete_message(data["location_req"]["chat"]["id"], data["location_req"]["message_id"])
 
         lat, lon = message.location.latitude, message.location.longitude
-        res = await Weather((lat, lon), data["start_date"])._request_weather((lat, lon),data["start_date"], data["start_date"])
-        await bot.send_message(message.from_user.id, f"{date_formatting(data['start_date'])}\n\n"
-                                                     f"{res}")
+        print(data["type"])
+        res = Weather((lat, lon), data["start_date"], data["type"])
+        res_msg = await res.current_weather()
+        await message.answer(res_msg)
+
     await message.delete()
+    await state.finish()
 
 
 @dp.message_handler(commands=["test"])
 async def test(message: types.Message):
-    print(Weather._request_weather.cache_info())
-    await Weather((55.43, 54.32), date(2023, 7, 6))._request_weather((55.43, 54.32), date(2023, 7, 6),date(2023, 7, 6))
+    test_obj = Weather((55.43, 54.32), date(2023, 7, 6), SHORT)
+    res = await test_obj.current_weather()
+    await message.answer(res)
 
 
 # Запускаем бота и фоновую задачу
@@ -99,4 +103,3 @@ async def main():
 loop = asyncio.new_event_loop()
 # Запускаем
 loop.run_until_complete(main())
-
