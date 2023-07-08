@@ -78,9 +78,13 @@ async def weather_place(message: types.Message, state: FSMContext):
         await bot.delete_message(data["location_req"]["chat"]["id"], data["location_req"]["message_id"])
 
         lat, lon = message.location.latitude, message.location.longitude
-        print(data["type"])
         res = Weather((lat, lon), data["start_date"], data["type"])
-        res_msg = await res.current_weather()
+        if data["weather_time"] == CURRENT:
+            res_msg = await res.current_weather()
+        elif data["weather_time"] == TOMORROW:
+            res_msg = await res.tomorrow_weather()
+        else:
+            res_msg = None
         await message.answer(res_msg)
 
     await message.delete()

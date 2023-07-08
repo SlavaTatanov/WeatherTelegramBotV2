@@ -6,14 +6,12 @@ from copy import deepcopy
 from Bot.CALLBACKS import SHORT
 
 
-def date_formatting(date_for_format: date):
-    months = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня",
-              "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"]
-    days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
-    return f"{days[date_for_format.weekday()]}, {date_for_format.day} {months[int(date_for_format.month) - 1]}"
-
-
 class Weather:
+    """
+    Класс описывающий данные о погоде.
+    Получить погоду на сегодня Weather.current_weather()
+    Получить погоду на завтра Weather.tomorrow_weather()
+    """
     def __init__(self, coord, cur_date, weather_type):
         self.coord = coord
         self._cur_date = cur_date
@@ -24,7 +22,7 @@ class Weather:
     @req_counter("API_REQ")
     async def _request_weather(coord, start_date: date):
         """
-        Запрос погоды API
+        Запрос погоды API, его данные кешируются
         """
         end_date = start_date + timedelta(days=6)
         url = "https://api.open-meteo.com/v1/forecast"
@@ -43,6 +41,15 @@ class Weather:
                 res = await response.json()
                 return res
 
+    async def _get_weather(self):
+        """
+        Делаем запрос к АПИ и форматируем его для дальнейшей работы
+        """
+        req = await self._request_weather(self.coord, self._cur_date)
+        req = deepcopy(req)
+        normal_data = self._data_normalize(req)
+        return normal_data
+
     @staticmethod
     def _data_normalize(api_req):
         """
@@ -60,15 +67,30 @@ class Weather:
         return res
 
     async def current_weather(self):
-        req = await self._request_weather(self.coord, self._cur_date)
-        req = deepcopy(req)
-        normal_data = self._data_normalize(req)
-        res = {k: v for k, v in normal_data.items() if str(self._cur_date) in k}
-        res_header = date_formatting(self._cur_date) + "\n\n"
+        """
+        Получить погоду на сегодня
+        """
+        req = await self._get_weather()
+        res = self._filter_data_by_date(self._cur_date, req)
+        res_header = self._date_formatting(self._cur_date) + "\n\n"
         res_body = self._day_formatting(res)
         return res_header + res_body
 
-    def _weekend_days(self):
+    async def tomorrow_weather(self):
+        """
+        Получить погоду на завтра
+        """
+        req = await self._get_weather()
+        tomorrow = self._cur_date + timedelta(days=1)
+        res = self._filter_data_by_date(tomorrow, req)
+        res_header = self._date_formatting(tomorrow) + "\n\n"
+        res_body = self._day_formatting(res)
+        return res_header + res_body
+
+    def _weekend_days(self) -> tuple[date, date]:
+        """
+        Возвращает кортеж из субботы, воскресенья типа date
+        """
         year, week, _ = self._cur_date.isocalendar()
         saturday = date.fromisocalendar(year, week, 6)
         sunday = date.fromisocalendar(year, week, 7)
@@ -104,17 +126,38 @@ class Weather:
         pass
 
     @staticmethod
-    def _get_average_fields(data):
+    def _get_average_fields(data: list) -> dict[str, float]:
+        """
+        Принимает список с данными для нескольких часов, и сводит их в один усредняя значения
+        """
         average_dict = {}
         for field in data[0].keys():
             # field это перебор всех ключей, в данном случае для первого элемента
             # будет 'cloudcover', 'precipitation_probability' ...
             values = [item[field] for item in data]  # Получить все значения для данного поля
-            average_dict[field] = round(sum(values) / len(values), 2)
+            average_dict[field] = round(sum(values) / len(values), 2)  # Доб усредненное значение в рез словарь
         return average_dict
+
+    @staticmethod
+    def _filter_data_by_date(date_input: date, data: dict) -> dict:
+        """
+        Фильтрует данные по текущей дате
+        """
+        return {k: v for k, v in data.items() if str(date_input) in k}
+
+    @staticmethod
+    def _date_formatting(date_for_format: date):
+        months = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня",
+                  "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"]
+        days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+        return f"{days[date_for_format.weekday()]}, {date_for_format.day} {months[int(date_for_format.month) - 1]}"
 
 
 class Wind:
+    """
+    Класс описывающий ветер, имеет строковое представление вида
+    f"{self.speed} м/с (до {self.gusts} м/с) {self.direction}"
+    """
     def __init__(self, speed, direction, gusts=None):
         """
         Скорость и порывы принимает в км/ч переводит в м/с
@@ -153,3 +196,7 @@ class Wind:
             return "СЗ ⇘"
         else:
             return "С ⇓"
+
+
+class Clouds:
+    pass
