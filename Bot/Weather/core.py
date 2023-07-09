@@ -4,6 +4,7 @@ from async_lru import alru_cache
 from Bot.utils import req_counter
 from copy import deepcopy
 from Bot.CALLBACKS import SHORT
+from pprint import pprint
 
 
 class Weather:
@@ -33,7 +34,7 @@ class Weather:
             "end_date": str(end_date),
             "hourly": "temperature_2m,precipitation_probability,"
                       "rain,showers,snowfall,cloudcover,windspeed_10m,"
-                      "winddirection_10m,windgusts_10m",
+                      "winddirection_10m,windgusts_10m,weathercode",
             "timezone": "auto"
         }
         async with ClientSession() as session:
@@ -115,7 +116,7 @@ class Weather:
         }
         msg = ""
         for k, v in info.items():
-            msg += f"{k}\n\n" \
+            msg += f"{k} {Clouds(v['cloudcover'], v['rain'], v['showers'], v['snowfall'])}\n\n" \
                    f"🌡: {int(v['temperature_2m'])}℃\n" \
                    f"💨: {Wind(v['windspeed_10m'], int(v['winddirection_10m']), v['windgusts_10m'])}" \
                    f"\n\n"
@@ -199,4 +200,33 @@ class Wind:
 
 
 class Clouds:
-    pass
+    info = ["☀️🌤⛅ ️🌥 ☁️ 🌦🌧⛈🌩🌨"]
+
+    def __init__(self, cloud_cover, rain, showers, snow):
+        self._cloud_cover = cloud_cover
+        self._rain = rain + showers
+        self._snow = snow
+
+    def __str__(self):
+        return f"{self._get_image()}"
+
+    def _get_image(self):
+        # Передаем объект вида [cloud, rain, snow]
+        # И начинаем сопоставлять
+        match [self._cloud_cover, self._rain, self._snow]:
+            case [_, _, snow] if snow > 0:
+                return "🌨"
+            case [cloud, rain, _] if rain > 0 and cloud < 50:
+                return "🌦"
+            case [cloud, rain, _] if rain > 0 and cloud >= 50:
+                return "🌧"
+            case [cloud, _, _] if cloud <= 20:
+                return "☀️"
+            case [cloud, _, _] if cloud <= 40:
+                return "🌤"
+            case [cloud, _, _] if cloud <= 60:
+                return "⛅"
+            case [cloud, _, _] if cloud <= 80:
+                return "🌥"
+            case [cloud, _, _] if cloud <= 100:
+                return "☁️"
