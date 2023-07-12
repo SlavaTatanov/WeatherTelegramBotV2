@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 import asyncio
 from Bot import dp, bot, WeatherState
 from Bot.keboards import replay_get_location, inline_get_weather_type, inline_get_weather_places, inline_weather_type
-from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT
+from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT, FIVE_DAY
 from Bot.Weather.core import Weather
 from Bot.background_task import back_task
 from datetime import date
@@ -49,7 +49,7 @@ async def weather_time(callback: types.CallbackQuery, state: FSMContext):
     else:
         async with state.proxy() as data:
             # Сразу устанавливаем детализацию погоды
-            data["weather_type"] = COMMON
+            data["type"] = SHORT
         await WeatherState.weather_place.set()
         await callback.message.edit_text("Выберете место", reply_markup=inline_get_weather_places())
 
@@ -75,17 +75,29 @@ async def weather_place(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         # Удаляем inline сообщение и запрос позиции
         await data["msg"].delete()
-        await bot.delete_message(data["location_req"]["chat"]["id"], data["location_req"]["message_id"])
+        try:
+            await bot.delete_message(data["location_req"]["chat"]["id"], data["location_req"]["message_id"])
+        except KeyError:
+            pass
 
         lat, lon = message.location.latitude, message.location.longitude
         res = Weather((lat, lon), data["start_date"], data["type"])
+
+        # Отвечаем юзеру в зависимости от типа погоды
         if data["weather_time"] == CURRENT:
             res_msg = await res.current_weather()
+            await message.answer(res_msg)
         elif data["weather_time"] == TOMORROW:
             res_msg = await res.tomorrow_weather()
+            await message.answer(res_msg)
+        elif data["weather_time"] == FIVE_DAY:
+            async for msg in res.five_day_weather():
+                await message.answer(msg)
+        elif data["weather_time"] == WEEKEND:
+            async for msg in res.weekend_weather():
+                await message.answer(msg)
         else:
-            res_msg = None
-        await message.answer(res_msg)
+            await message.answer("Что то пошло не так!")
 
     await message.delete()
     await state.finish()
@@ -93,7 +105,7 @@ async def weather_place(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["test"])
 async def test(message: types.Message):
-    test_obj = Weather((55.43, 54.32), date(2023, 7, 6), SHORT)
+    test_obj = Weather((52.47, 42.63), date(2023, 7, 9), SHORT)
     res = await test_obj.current_weather()
     await message.answer(res)
 

@@ -4,7 +4,6 @@ from async_lru import alru_cache
 from Bot.utils import req_counter
 from copy import deepcopy
 from Bot.CALLBACKS import SHORT
-from pprint import pprint
 
 
 class Weather:
@@ -88,6 +87,34 @@ class Weather:
         res_body = self._day_formatting(res)
         return res_header + res_body
 
+    async def weekend_weather(self):
+        """
+        Получить погоду на выходные, работает как генератор
+        """
+        req = await self._get_weather()
+        saturday, sunday = self._weekend_days()
+        for day in (saturday, sunday):
+            res = self._filter_data_by_date(day, req)
+            res_header = self._date_formatting(day) + "\n\n"
+            res_body = self._day_formatting(res)
+            yield res_header + res_body
+
+    async def five_day_weather(self):
+        """
+        Погода на 5 дней
+        """
+        req = await self._get_weather()
+        first = self._cur_date
+        second = self._cur_date + timedelta(days=1)
+        third = self._cur_date + timedelta(days=2)
+        fourth = self._cur_date + timedelta(days=3)
+        five = self._cur_date + timedelta(days=4)
+        for day in (first, second, third, fourth, five):
+            res = self._filter_data_by_date(day, req)
+            res_header = self._date_formatting(day) + "\n\n"
+            res_body = self._day_formatting(res)
+            yield res_header + res_body
+
     def _weekend_days(self) -> tuple[date, date]:
         """
         Возвращает кортеж из субботы, воскресенья типа date
@@ -109,16 +136,37 @@ class Weather:
         day = [v for k, v in day_info.items() if "11:00" < k[-5:] <= "17:00"]
         evening = [v for k, v in day_info.items() if "17:00" < k[-5:] <= "23:00"]
         info = {
-            "Ночь": self._get_average_fields(night),
-            "Утро": self._get_average_fields(morning),
-            "День": self._get_average_fields(day),
-            "Вечер": self._get_average_fields(evening)
+            "Ночь": {
+                "avg": self._get_average_fields(night),
+                "max": self._get_max_fields(night)
+            },
+            "Утро": {
+                "avg": self._get_average_fields(morning),
+                "max": self._get_max_fields(morning)
+            },
+            "День": {
+                "avg": self._get_average_fields(day),
+                "max": self._get_max_fields(day)
+            },
+            "Вечер": {
+                "avg": self._get_average_fields(evening),
+                "max": self._get_max_fields(evening)
+            }
         }
         msg = ""
         for k, v in info.items():
-            msg += f"{k} {Clouds(v['cloudcover'], v['rain'], v['showers'], v['snowfall'])}\n\n" \
-                   f"🌡: {int(v['temperature_2m'])}℃\n" \
-                   f"💨: {Wind(v['windspeed_10m'], int(v['winddirection_10m']), v['windgusts_10m'])}" \
+            clouds = Clouds(
+                v["avg"]['cloudcover'],
+                v["avg"]['rain'], v["avg"]['showers'],
+                v['avg']['snowfall'],
+                v["max"]["weathercode"]
+            )
+            wind = Wind(v["avg"]['windspeed_10m'], int(v['avg']['winddirection_10m']), v['max']['windgusts_10m'])
+            avg_temp = int(v['avg']['temperature_2m'])
+            max_temp = int(v['max']['temperature_2m'])
+            msg += f"{k} {clouds}\n\n" \
+                   f"🌡: {avg_temp}℃ (max: {max_temp}℃)\n" \
+                   f"💨: {wind}" \
                    f"\n\n"
         return msg
 
@@ -138,6 +186,17 @@ class Weather:
             values = [item[field] for item in data]  # Получить все значения для данного поля
             average_dict[field] = round(sum(values) / len(values), 2)  # Доб усредненное значение в рез словарь
         return average_dict
+
+    @staticmethod
+    def _get_max_fields(data: list):
+        """
+        Получаем максимальные значения для полей
+        """
+        max_fields = {}
+        for field in data[0].keys():
+            values = [item[field] for item in data]
+            max_fields[field] = max(values)
+        return max_fields
 
     @staticmethod
     def _filter_data_by_date(date_input: date, data: dict) -> dict:
@@ -200,12 +259,14 @@ class Wind:
 
 
 class Clouds:
-    info = ["☀️🌤⛅ ️🌥 ☁️ 🌦🌧⛈🌩🌨"]
-
-    def __init__(self, cloud_cover, rain, showers, snow):
+    """
+    Класс определяющий иконку облаков, осадков, гроз
+    """
+    def __init__(self, cloud_cover, rain, showers, snow, weather_code):
         self._cloud_cover = cloud_cover
         self._rain = rain + showers
         self._snow = snow
+        self._weather_code = weather_code
 
     def __str__(self):
         return f"{self._get_image()}"
@@ -213,20 +274,24 @@ class Clouds:
     def _get_image(self):
         # Передаем объект вида [cloud, rain, snow]
         # И начинаем сопоставлять
-        match [self._cloud_cover, self._rain, self._snow]:
-            case [_, _, snow] if snow > 0:
+        match [self._cloud_cover, self._rain, self._snow, self._weather_code]:
+            case [_, rain, _, code] if rain > 0 and code in [95, 96, 99]:
+                return "⛈"
+            case [_, _, _, code] if code in [95, 96, 99]:
+                return "🌩"
+            case [_, _, snow, _] if snow > 0:
                 return "🌨"
-            case [cloud, rain, _] if rain > 0 and cloud < 50:
+            case [cloud, rain, _, _] if rain > 0 and cloud < 50:
                 return "🌦"
-            case [cloud, rain, _] if rain > 0 and cloud >= 50:
+            case [cloud, rain, _, _] if rain > 0 and cloud >= 50:
                 return "🌧"
-            case [cloud, _, _] if cloud <= 20:
+            case [cloud, _, _, _] if cloud <= 20:
                 return "☀️"
-            case [cloud, _, _] if cloud <= 40:
+            case [cloud, _, _, _] if cloud <= 40:
                 return "🌤"
-            case [cloud, _, _] if cloud <= 60:
+            case [cloud, _, _, _] if cloud <= 60:
                 return "⛅"
-            case [cloud, _, _] if cloud <= 80:
+            case [cloud, _, _, _] if cloud <= 80:
                 return "🌥"
-            case [cloud, _, _] if cloud <= 100:
+            case [cloud, _, _, _] if cloud <= 100:
                 return "☁️"
