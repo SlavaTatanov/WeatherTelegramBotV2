@@ -1,12 +1,11 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 import asyncio
-from Bot import dp, bot, WeatherState
+from Bot import dp, bot, WeatherState, set_commands
 from Bot.keboards import replay_get_location, inline_get_weather_type, inline_get_weather_places, inline_weather_type
 from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT, FIVE_DAY
 from Bot.Weather.core import Weather
 from Bot.background_task import back_task
-from datetime import date
 
 
 @dp.message_handler(commands=['start'])
@@ -16,7 +15,7 @@ async def start(message: types.Message):
     """
     answer_for_user = "Здравствуйте, уважаемый пользователь! Я рад приветствовать вас. " \
                       "Хочу сообщить вам, что в настоящее время бот находится в активной разработке," \
-                      " и скоро он будет доступен для использования. "
+                      " в данный момент доступны только короткие прогнозы погоды. Часть функций может не работать"
     await message.answer(answer_for_user)
 
 
@@ -51,7 +50,8 @@ async def weather_time(callback: types.CallbackQuery, state: FSMContext):
             # Сразу устанавливаем детализацию погоды
             data["type"] = SHORT
         await WeatherState.weather_place.set()
-        await callback.message.edit_text("Выберете место", reply_markup=inline_get_weather_places())
+        await callback.message.edit_text("Отправьте гео-позицию или выберете из списка",
+                                         reply_markup=inline_get_weather_places())
 
 
 @dp.callback_query_handler(lambda callback: callback.data in FREQUENCY, state=WeatherState.weather_type)
@@ -59,7 +59,8 @@ async def weather_type(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["type"] = callback.data
     await WeatherState.next()
-    await callback.message.edit_text("Выберете место", reply_markup=inline_get_weather_places())
+    await callback.message.edit_text("Отправьте гео-позицию или выберете из списка",
+                                     reply_markup=inline_get_weather_places())
 
 
 @dp.callback_query_handler(lambda callback: callback.data == "current_place", state=WeatherState.weather_place)
@@ -105,6 +106,7 @@ async def weather_place(message: types.Message, state: FSMContext):
 
 # Запускаем бота и фоновую задачу
 async def main():
+    await set_commands(dp)
     asyncio.create_task(back_task())
     await dp.start_polling()
 
