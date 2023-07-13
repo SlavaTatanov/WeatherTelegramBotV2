@@ -103,13 +103,6 @@ async def weather_place(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(commands=["test"])
-async def test(message: types.Message):
-    test_obj = Weather((52.47, 42.63), date(2023, 7, 9), SHORT)
-    res = await test_obj.current_weather()
-    await message.answer(res)
-
-
 # Запускаем бота и фоновую задачу
 async def main():
     asyncio.create_task(back_task())
