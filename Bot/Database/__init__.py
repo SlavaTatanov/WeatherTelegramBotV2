@@ -18,3 +18,8 @@ def get_client():
 # Класс, который реализует метод подключения к БД, в зависимости от статуса (локально, сервер)
 mongo_client = get_client()
 mongo_db = mongo_client.get_database()
+
+
+# Индексы
+async def create_indexes():
+    await mongo_db["bot_log_info"].create_index([("date_log", -1)])

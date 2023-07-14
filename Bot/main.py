@@ -6,6 +6,8 @@ from Bot.keboards import replay_get_location, inline_get_weather_type, inline_ge
 from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT, FIVE_DAY
 from Bot.Weather.core import Weather
 from Bot.background_task import back_task
+from Bot.Database.models import BotLogInfo
+from Bot.Database import create_indexes
 
 
 @dp.message_handler(commands=['start'])
@@ -104,10 +106,19 @@ async def weather_place(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+@dp.message_handler(commands=["test"])
+async def test(message: types.Message):
+    pass
+
+
 # Запускаем бота и фоновую задачу
 async def main():
+    # Создаем индексы, устанавливаем команды бота
+    await create_indexes()
     await set_commands(dp)
+    # Запускаем фоновую задачу
     asyncio.create_task(back_task())
+    # Запускаем бота
     await dp.start_polling()
 
 # Получаем loop

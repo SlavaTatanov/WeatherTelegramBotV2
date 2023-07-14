@@ -212,6 +212,11 @@ class Weather:
         days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
         return f"{days[date_for_format.weekday()]}, {date_for_format.day} {months[int(date_for_format.month) - 1]}"
 
+    @classmethod
+    def clean_api_cache(cls):
+        """Чистим кеш функции запроса к апи"""
+        cls._request_weather.cache_clear()
+
 
 class Wind:
     """

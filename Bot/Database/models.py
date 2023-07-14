@@ -1,9 +1,13 @@
 from Bot.Database import mongo_db
+from datetime import date
 
 
 class BaseModel:
     """
-    Базовая модель для взаимодействия с Mongo
+    Базовая модель для взаимодействия с Mongo,
+    предоставляет методы:
+    save() - сохраняет объект в БД
+    При наследовании вызвать метод init и передать в него имя коллекции с которой работает модель.
     """
     def __init__(self, collection):
         self.__collection = collection
@@ -48,3 +52,19 @@ class UserInfo(BaseModel):
         """
         query = mongo_db["user_info"].find_one({"_id": user_id})
         return cls(user_id)
+
+
+class BotLogInfo(BaseModel):
+    """
+    Класс описывающий логи, запросы к API и другое
+    """
+    def __init__(self, api_req_counter: int):
+        super().__init__("bot_log_info")
+        self.date_log = str(date.today())
+        self.api_req = api_req_counter
+
+    def _get_info(self):
+        pass
+
+    def get_5_day_info(self):
+        pass
