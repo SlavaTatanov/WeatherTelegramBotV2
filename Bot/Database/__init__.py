@@ -17,4 +17,4 @@ def get_client():
 
 # Класс, который реализует метод подключения к БД, в зависимости от статуса (локально, сервер)
 mongo_client = get_client()
-mongo_db = mongo_client["weather_bot"]
+mongo_db = mongo_client.get_database()
