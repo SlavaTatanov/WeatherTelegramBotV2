@@ -1,7 +1,28 @@
 from Bot.Database import mongo_db
 
 
-class UserInfo:
+class BaseModel:
+    """
+    Базовая модель для взаимодействия с Mongo
+    """
+    def __init__(self, collection):
+        self.__collection = collection
+
+    def _get_mongo_dict(self) -> dict:
+        """
+        Получить словарь который можно сохранять в БД.
+        Вставляет только неприватные аттрибуты и не пустые.
+        Фильтрует так: if not k.startswith(private_attrs) and v.
+        """
+        private_attrs = f"_{self.__class__.__name__}__"
+        return {k: v for (k, v) in self.__dict__.items() if not k.startswith(private_attrs) and v}
+
+    async def save(self):
+        obj = self._get_mongo_dict()
+        await mongo_db[self.__collection].insert_one(obj)
+
+
+class UserInfo(BaseModel):
     """
     Модель описывающая информацию пользователя.
     Предоставляет интерфейс для взаимодействия с БД
@@ -14,6 +35,7 @@ class UserInfo:
     Сохраняем obj.save()
     """
     def __init__(self, user_id: int, places: dict | None = None, in_db: bool = False):
+        super().__init__("user_info")
         self._id = user_id
         self.places = places
         # Определяем есть ли этот пользователь в БД
@@ -26,12 +48,3 @@ class UserInfo:
         """
         query = mongo_db["user_info"].find_one({"_id": user_id})
         return cls(user_id)
-
-    def _get_mongo_dict(self) -> dict:
-        """
-        Получить словарь который можно сохранять в БД.
-        Вставляет только неприватные аттрибуты и не пустые.
-        Фильтрует так: if not k.startswith(private_attrs) and v.
-        """
-        private_attrs = f"_{self.__class__.__name__}__"
-        return {k: v for (k, v) in self.__dict__.items() if not k.startswith(private_attrs) and v}
