@@ -30,6 +30,9 @@ dp.register_message_handler(view_settings.settings_menu, commands=["settings"])
 
 # -- admin --
 dp.register_callback_query_handler(view_admin.admin_menu, lambda callback: callback.data == "admin-panel")
+dp.register_callback_query_handler(view_admin.admin_log_api, lambda callback: callback.data == "api_log")
+dp.register_callback_query_handler(view_admin.admin_api_log_5_day, lambda callback: callback.data == "api_log_5_days")
+dp.register_callback_query_handler(view_admin.admin_api_log_max, lambda callback: callback.data == "api_log_max")
 
 
 async def set_commands(disp: Dispatcher):

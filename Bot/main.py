@@ -106,6 +106,11 @@ async def weather_place(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+@dp.callback_query_handler(lambda callback: callback.data == "exit")
+async def exit_menu(callback: types.CallbackQuery):
+    await callback.message.delete()
+
+
 @dp.message_handler(commands=["test"])
 async def test(message: types.Message):
     pass

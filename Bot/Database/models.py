@@ -58,13 +58,43 @@ class BotLogInfo(BaseModel):
     """
     Класс описывающий логи, запросы к API и другое
     """
-    def __init__(self, api_req_counter: int):
+    def __init__(self, api_req_counter: int | None = None):
         super().__init__("bot_log_info")
         self.date_log = str(date.today())
         self.api_req = api_req_counter
 
-    def _get_info(self):
-        pass
+    @staticmethod
+    def _get_info(lim, sort_tag):
+        res = mongo_db["bot_log_info"].find().sort(sort_tag, -1).limit(lim)
+        return res
 
-    def get_5_day_info(self):
-        pass
+    @classmethod
+    async def get_5_day_info(cls):
+        """
+        Возвращает строку с сообщением о логах за последние 5 дней
+        """
+        req = cls._get_info(5, "date_log")
+        res = await cls.create_msg(req)
+        return res
+
+    @classmethod
+    async def get_max_api_req(cls):
+        """
+        Дни с максимальным количеством запросов
+        """
+        req = cls._get_info(5, "api_req")
+        res = await cls.create_msg(req)
+        return res
+
+    @staticmethod
+    async def create_msg(req):
+        """
+        Метод принимает результат множественного запроса и формирует сообщение
+        """
+        res = []
+        async for it in req:
+            res.append(it)
+        res_msg = ""
+        for it in res:
+            res_msg += f"{it['date_log']} -> {it['api_req']}\n"
+        return res_msg

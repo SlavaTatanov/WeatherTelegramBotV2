@@ -45,8 +45,38 @@ def inline_weather_type(weather_type=None):
 
 
 def inline_settings_menu(user_id: int):
+    """
+    Клавиатура настроек:
+    - Добавить место
+    - Удалить место
+    - Админ-панель (у админа)
+    """
     keyboard = types.InlineKeyboardMarkup()
     if user_id in OWNERS:
         keyboard.add(types.InlineKeyboardButton("Админ-меню", callback_data="admin-panel"))
     return keyboard
 
+
+def inline_admin_menu():
+    """
+    Меню админа:
+    - Логи запросов к API
+    - Выход
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Логи-запросов к API", callback_data="api_log"))
+    keyboard.add(types.InlineKeyboardButton("Выход", callback_data="exit"))
+    return keyboard
+
+
+def inline_admin_api_log():
+    """
+    Меню выбора типа логов:
+    - Запросы за 5 дней
+    - Назад (Вернет к админ меню)
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Запросы за 5 дней", callback_data="api_log_5_days"))
+    keyboard.add(types.InlineKeyboardButton("Максимальное кол-во запросов", callback_data="api_log_max"))
+    keyboard.add(types.InlineKeyboardButton("Назад", callback_data="admin-panel"))
+    return keyboard
