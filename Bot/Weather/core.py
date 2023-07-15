@@ -164,9 +164,11 @@ class Weather:
             wind = Wind(v["avg"]['windspeed_10m'], int(v['avg']['winddirection_10m']), v['max']['windgusts_10m'])
             avg_temp = int(v['avg']['temperature_2m'])
             max_temp = int(v['max']['temperature_2m'])
-            msg += f"{k} {clouds}\n\n" \
-                   f"🌡: {avg_temp}℃ (max: {max_temp}℃)\n" \
-                   f"💨: {wind}" \
+            weather_code = WeatherCode(v["max"]["weathercode"])
+            msg += f"<b>{k}</b> {clouds}\n" \
+                   f"<i>{weather_code}</i>\n\n" \
+                   f"🌡 Температура: {avg_temp}℃ (max: {max_temp}℃)\n" \
+                   f"💨 Ветер: {wind}" \
                    f"\n\n"
         return msg
 
@@ -300,3 +302,73 @@ class Clouds:
                 return "🌥"
             case [cloud, _, _, _] if cloud <= 100:
                 return "☁️"
+
+
+class WeatherCode:
+    """
+    Класс имеющий строковое представление - описание погоды по коду
+    """
+    def __init__(self, code):
+        self.code = code
+
+    def __str__(self):
+        get_str = self._get_description()
+        if get_str:
+            return f"{get_str}"
+        else:
+            return ""
+
+    def _get_description(self):
+        match self.code:
+            case 0:
+                return "Ясно"
+            case 1:
+                return "Преимущественно ясно"
+            case 2:
+                return "Переменная облачность"
+            case 3:
+                return "Пасмурно"
+            case 45:
+                return "Туман"
+            case 48:
+                return "Туман с изморозью"
+            case 51:
+                return "Легкий моросящий дождь"
+            case 53:
+                return "Умеренный моросящий дождь"
+            case 55:
+                return "Плотный моросящий дождь"
+            case 56:
+                return "Легкий ледяной моросящий дождь"
+            case 57:
+                return "Плотный ледяной моросящий дождь"
+            case 61:
+                return "Легкий дождь"
+            case 63:
+                return "Умеренный дождь"
+            case 65:
+                return "Сильный дождь"
+            case 66:
+                return "Легкий ледяной дождь"
+            case 67:
+                return "Сильный ледяной дождь"
+            case 71:
+                return "Легкий снегопад"
+            case 73:
+                return "Средний снегопад"
+            case 75:
+                return "Сильный снегопад"
+            case 77:
+                return "Снежный зерна"
+            case 80:
+                return "Дождь"
+            case 81:
+                return "Ливень"
+            case 82:
+                return "Сильный ливень"
+            case 85:
+                return "Сильный снегопад"
+            case 86:
+                return "Очень сильный снегопад"
+            case code if code in [95, 96, 99]:
+                return "Гроза"

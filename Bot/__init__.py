@@ -21,7 +21,7 @@ def get_token() -> str:
 
 storage = MemoryStorage()
 
-bot = Bot(get_token())
+bot = Bot(get_token(), parse_mode="HTML")
 dp = Dispatcher(bot, storage=storage)
 
 # Регистрация handlers
