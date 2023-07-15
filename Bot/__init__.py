@@ -4,6 +4,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from os import getenv
 from Bot.config import TOKEN, DEVELOPMENT, TEST_TOKEN
+import Bot.views.settings as view_settings
+import Bot.views.admin as view_admin
 
 
 def get_token() -> str:
@@ -21,6 +23,13 @@ storage = MemoryStorage()
 
 bot = Bot(get_token())
 dp = Dispatcher(bot, storage=storage)
+
+# Регистрация handlers
+# -- settings --
+dp.register_message_handler(view_settings.settings_menu, commands=["settings"])
+
+# -- admin --
+dp.register_callback_query_handler(view_admin.admin_menu, lambda callback: callback.data == "admin-panel")
 
 
 async def set_commands(disp: Dispatcher):

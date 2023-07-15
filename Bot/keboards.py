@@ -1,5 +1,6 @@
 from aiogram import types
 from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, COMMON, TOMORROW
+from Bot.config import OWNERS
 
 
 def replay_get_location() -> types.ReplyKeyboardMarkup:
@@ -41,3 +42,11 @@ def inline_weather_type(weather_type=None):
     keyboard.add(types.InlineKeyboardButton("Краткий", callback_data=SHORT))
     keyboard.add(types.InlineKeyboardButton("Обычный", callback_data=COMMON))
     return keyboard
+
+
+def inline_settings_menu(user_id: int):
+    keyboard = types.InlineKeyboardMarkup()
+    if user_id in OWNERS:
+        keyboard.add(types.InlineKeyboardButton("Админ-меню", callback_data="admin-panel"))
+    return keyboard
+
