@@ -6,6 +6,7 @@ from os import getenv
 from Bot.config import TOKEN, DEVELOPMENT, TEST_TOKEN
 import Bot.views.settings as view_settings
 import Bot.views.admin as view_admin
+from Bot.CALLBACKS import ADMIN_MENU, ADMIN_API_LOG, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX
 
 
 def get_token() -> str:
@@ -26,13 +27,17 @@ dp = Dispatcher(bot, storage=storage)
 
 # Регистрация handlers
 # -- settings --
-dp.register_message_handler(view_settings.settings_menu, commands=["settings"])
+dp.register_message_handler(view_settings.settings_menu, commands=["settings"], state="*")
 
 # -- admin --
-dp.register_callback_query_handler(view_admin.admin_menu, lambda callback: callback.data == "admin-panel")
-dp.register_callback_query_handler(view_admin.admin_log_api, lambda callback: callback.data == "api_log")
-dp.register_callback_query_handler(view_admin.admin_api_log_5_day, lambda callback: callback.data == "api_log_5_days")
-dp.register_callback_query_handler(view_admin.admin_api_log_max, lambda callback: callback.data == "api_log_max")
+dp.register_callback_query_handler(view_admin.admin_menu,
+                                   lambda callback: callback.data == ADMIN_MENU, state="*")
+dp.register_callback_query_handler(view_admin.admin_log_api,
+                                   lambda callback: callback.data == ADMIN_API_LOG, state="*")
+dp.register_callback_query_handler(view_admin.admin_api_log_5_day,
+                                   lambda callback: callback.data == ADMIN_API_LOG_5, state="*")
+dp.register_callback_query_handler(view_admin.admin_api_log_max,
+                                   lambda callback: callback.data == ADMIN_API_LOG_MAX, state="*")
 
 
 async def set_commands(disp: Dispatcher):

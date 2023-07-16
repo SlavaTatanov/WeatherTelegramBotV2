@@ -3,7 +3,8 @@ from aiogram.dispatcher import FSMContext
 import asyncio
 from Bot import dp, bot, WeatherState, set_commands
 from Bot.keboards import replay_get_location, inline_get_weather_type, inline_get_weather_places, inline_weather_type
-from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT, FIVE_DAY
+from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TOMORROW, SHORT, FIVE_DAY, \
+    CURRENT_PLACE, EXIT
 from Bot.Weather.core import Weather
 from Bot.background_task import back_task
 from Bot.Database.models import BotLogInfo
@@ -65,7 +66,7 @@ async def weather_type(callback: types.CallbackQuery, state: FSMContext):
                                      reply_markup=inline_get_weather_places())
 
 
-@dp.callback_query_handler(lambda callback: callback.data == "current_place", state=WeatherState.weather_place)
+@dp.callback_query_handler(lambda callback: callback.data == CURRENT_PLACE, state=WeatherState.weather_place)
 async def current_place(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["weather_type"] = callback.data
@@ -106,7 +107,7 @@ async def weather_place(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@dp.callback_query_handler(lambda callback: callback.data == "exit")
+@dp.callback_query_handler(lambda callback: callback.data == EXIT, state="*")
 async def exit_menu(callback: types.CallbackQuery):
     await callback.message.delete()
 
