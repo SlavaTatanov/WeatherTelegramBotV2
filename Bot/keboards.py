@@ -1,6 +1,9 @@
+import datetime
+
 from aiogram import types
 from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, COMMON, TOMORROW
 from Bot.config import OWNERS
+from Bot.utils import is_sunday
 
 
 def replay_get_location() -> types.ReplyKeyboardMarkup:
@@ -13,15 +16,19 @@ def replay_get_location() -> types.ReplyKeyboardMarkup:
     return keyboard
 
 
-def inline_get_weather_type() -> types.InlineKeyboardMarkup:
+def inline_get_weather_type(day: datetime.date) -> types.InlineKeyboardMarkup:
     """
     Клавиатура для выбора погоды (сегодня, завтра, 5 дней, выходные)
     """
+    if is_sunday(day):
+        weekend = "След. выходные"
+    else:
+        weekend = "Выходные"
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     keyboard.row(types.InlineKeyboardButton("Сегодня", callback_data=CURRENT),
                  types.InlineKeyboardButton("Завтра", callback_data=TOMORROW))
     keyboard.row(types.InlineKeyboardButton("5 дней", callback_data=FIVE_DAY),
-                 types.InlineKeyboardButton("Выходные", callback_data=WEEKEND))
+                 types.InlineKeyboardButton(weekend, callback_data=WEEKEND))
     return keyboard
 
 

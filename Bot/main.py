@@ -28,7 +28,7 @@ async def weather(message: types.Message):
     Даем пользователю inline клавиатуру с кнопками
     """
     await WeatherState.weather_time.set()
-    await message.answer("Какую погоду вы хотите узнать?", reply_markup=inline_get_weather_type())
+    await message.answer("Какую погоду вы хотите узнать?", reply_markup=inline_get_weather_type(message.date.date()))
 
 
 @dp.callback_query_handler(lambda callback: callback.data in WEATHER_TIMES, state=WeatherState.weather_time)

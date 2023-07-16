@@ -1,3 +1,5 @@
+from datetime import date
+
 def req_counter(key):
     """
     Счетчик запросов к API
@@ -14,3 +16,8 @@ def req_counter(key):
             return await fun(*args, **kwargs)
         return wrapper
     return req_counter_dec
+
+
+def is_sunday(day: date):
+    year, week, _ = day.isocalendar()
+    return day == date.fromisocalendar(year, week, 7)
