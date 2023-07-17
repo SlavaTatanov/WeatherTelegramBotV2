@@ -16,6 +16,16 @@ FREQUENCY = [SHORT, COMMON]
 # Места
 CURRENT_PLACE = "current_place"
 
+# Настройки
+SETTINGS = 'settings_main'
+SETTINGS_PLACES = 'settings_places'
+SETTINGS_FEEDBACK = 'settings_feedback'
+SETTINGS_PLC_ADD = 'settings_place_add'
+SETTINGS_PLC_DEL = 'settings_place_del'
+SETTINGS_FEED_BAG = 'settings_feedback_bag'
+SETTINGS_FEED_FEATURE = 'settings_feedback_feature'
+FEEDBACK = [SETTINGS_FEED_FEATURE, SETTINGS_FEED_BAG]
+
 # Админ-меню
 ADMIN_MENU = "admin-panel"
 ADMIN_API_LOG = "api_log"
