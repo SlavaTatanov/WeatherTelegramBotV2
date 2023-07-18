@@ -20,3 +20,4 @@ async def back_task():
             else:
                 obj = BotLogInfo(0)
             await obj.save()
+            req_counter.storage.pop('API_REQ')
