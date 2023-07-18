@@ -9,6 +9,7 @@ from Bot.Weather.core import Weather
 from Bot.background_task import back_task
 from Bot.Database.models import BotLogInfo
 from Bot.Database import create_indexes
+from Bot.Database.models import UserInfo
 
 
 @dp.message_handler(commands=['start'])
