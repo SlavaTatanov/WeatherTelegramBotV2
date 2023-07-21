@@ -21,7 +21,7 @@ class BaseModel:
         Фильтрует так: if not k.startswith(private_attrs) and v.
         """
         def check(x):
-            return bool(re.match(r"_\w+__", x))
+            return bool(re.match(r"^_\w+__", x))
         return {k: v for (k, v) in self.__dict__.items() if not check(k) and v}
 
     async def save(self):
