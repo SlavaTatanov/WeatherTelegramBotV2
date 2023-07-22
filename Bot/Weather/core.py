@@ -175,7 +175,7 @@ class Weather:
                    f"🌡 Температура: {avg_temp}℃ (max: {max_temp}℃)\n" \
                    f"💨 Ветер: {wind}"
             if rain:
-                msg += f"\n☔️Дождь: {rain}"
+                msg += f"\n☔️ Дождь: {rain}"
             msg += "\n\n"
         return msg
 

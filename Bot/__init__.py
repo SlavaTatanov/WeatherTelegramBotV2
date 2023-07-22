@@ -7,7 +7,7 @@ from Bot.config import TOKEN, DEVELOPMENT, TEST_TOKEN
 import Bot.views.settings as view_settings
 import Bot.views.admin as view_admin
 from Bot.CALLBACKS import ADMIN_MENU, ADMIN_API_LOG, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, \
-    SETTINGS_PLACES, SETTINGS_FEEDBACK
+    SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD
 
 
 def get_token() -> str:
@@ -35,6 +35,8 @@ dp.register_callback_query_handler(view_settings.settings_places_menu,
                                    lambda callback: callback.data == SETTINGS_PLACES, state="*")
 dp.register_callback_query_handler(view_settings.settings_feed_menu,
                                    lambda callback: callback.data == SETTINGS_FEEDBACK, state="*")
+dp.register_callback_query_handler(view_settings.settings_place_add,
+                                   lambda callback: callback.data == SETTINGS_PLC_ADD, state="*")
 
 # -- admin --
 dp.register_callback_query_handler(view_admin.admin_menu,
@@ -54,6 +56,17 @@ async def set_commands(disp: Dispatcher):
 
 # Создаем классы для машины состояний
 class WeatherState(StatesGroup):
+    """
+    Состояния для запроса погоды
+    """
     weather_time = State()
     weather_type = State()
     weather_place = State()
+
+
+class UserPlaces(StatesGroup):
+    """
+    Состояния для добавления мест
+    """
+    places_add = State()
+    place_del = State()
