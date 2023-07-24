@@ -7,9 +7,8 @@ from Bot.CALLBACKS import WEATHER_TIMES, CURRENT, FREQUENCY, WEEKEND, COMMON, TO
     CURRENT_PLACE, EXIT
 from Bot.Weather.core import Weather
 from Bot.background_task import back_task
-from Bot.Database.models import BotLogInfo
 from Bot.Database import create_indexes
-from Bot.Database.models import UserInfo
+from Bot.utils import state_save_related_msg, state_clean_with_messages
 
 
 @dp.message_handler(commands=['start'])
@@ -29,8 +28,15 @@ async def weather(message: types.Message):
     Выбираем когда мы хотим прогноз погоды, сегодня, завтра ...
     Даем пользователю inline клавиатуру с кнопками
     """
+    # Чистим предыдущие состояния
+    await state_clean_with_messages(message.from_user.id)
     await WeatherState.weather_time.set()
-    await message.answer("Какую погоду вы хотите узнать?", reply_markup=inline_get_weather_type(message.date.date()))
+    # Получаем состояние, связанное сообщение, сохраняем
+    state = dp.current_state(user=message.from_user.id)
+    msg = await message.answer("Какую погоду вы хотите узнать?", reply_markup=inline_get_weather_type(message.date.date()))
+    await state_save_related_msg(state, msg)
+    # Чистим сообщение юзера - это '/weather'
+    await message.delete()
 
 
 @dp.callback_query_handler(lambda callback: callback.data in WEATHER_TIMES, state=WeatherState.weather_time)
@@ -40,9 +46,8 @@ async def weather_time(callback: types.CallbackQuery, state: FSMContext):
     После запрашиваем тип погоды (почасовая, обычный, краткий прогноз) если погода текущая, либо сразу место.
     """
     async with state.proxy() as data:
+        # Запоминаем когда пользователь хочет узнать погоду (сегодня, завтра)
         data["weather_time"] = callback.data
-        # Запоминаем сообщение откуда приходит callback, потом удалим
-        data["msg"] = callback.message
         # Запоминаем текущую дату
         data["start_date"] = callback.message.date.date()
 

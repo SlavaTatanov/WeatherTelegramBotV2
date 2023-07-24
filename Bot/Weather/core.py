@@ -138,19 +138,23 @@ class Weather:
         info = {
             "Ночь": {
                 "avg": self._get_average_fields(night),
-                "max": self._get_max_fields(night)
+                "max": self._get_max_fields(night),
+                "sum": self._get_sum_fields(night)
             },
             "Утро": {
                 "avg": self._get_average_fields(morning),
-                "max": self._get_max_fields(morning)
+                "max": self._get_max_fields(morning),
+                "sum": self._get_sum_fields(morning)
             },
             "День": {
                 "avg": self._get_average_fields(day),
-                "max": self._get_max_fields(day)
+                "max": self._get_max_fields(day),
+                "sum": self._get_sum_fields(day)
             },
             "Вечер": {
                 "avg": self._get_average_fields(evening),
-                "max": self._get_max_fields(evening)
+                "max": self._get_max_fields(evening),
+                "sum": self._get_sum_fields(evening)
             }
         }
         msg = ""
@@ -165,11 +169,14 @@ class Weather:
             avg_temp = int(v['avg']['temperature_2m'])
             max_temp = int(v['max']['temperature_2m'])
             weather_code = WeatherCode(v["max"]["weathercode"])
+            rain = Rain(v['sum']['rain'], v['sum']['showers'])
             msg += f"<b>{k}</b> {clouds}\n" \
                    f"<i>{weather_code}</i>\n\n" \
                    f"🌡 Температура: {avg_temp}℃ (max: {max_temp}℃)\n" \
-                   f"💨 Ветер: {wind}" \
-                   f"\n\n"
+                   f"💨 Ветер: {wind}"
+            if rain:
+                msg += f"\n☔️ Дождь: {rain}"
+            msg += "\n\n"
         return msg
 
     @staticmethod
@@ -199,6 +206,17 @@ class Weather:
             values = [item[field] for item in data]
             max_fields[field] = max(values)
         return max_fields
+
+    @staticmethod
+    def _get_sum_fields(data: list):
+        """
+        Получаем сумму для поля
+        """
+        sum_fields = {}
+        for field in data[0].keys():
+            values = [item[field] for item in data]
+            sum_fields[field] = sum(values)
+        return sum_fields
 
     @staticmethod
     def _filter_data_by_date(date_input: date, data: dict) -> dict:
@@ -372,3 +390,28 @@ class WeatherCode:
                 return "Очень сильный снегопад"
             case code if code in [95, 96, 99]:
                 return "Гроза"
+
+
+class Rain:
+    """
+    Класс имеющий строковое представление дождя
+    """
+    def __init__(self, rain, showers):
+        """
+        Получаем дождь, ливни, вероятность, дождь и ливни для простоты складываем
+        """
+        self.rain = rain
+        self.showers = showers
+        self.all_rain = self.rain + self.showers
+
+    def __str__(self):
+        """
+        Строковое представление дождя, с округлением
+        """
+        return f"{round(self.all_rain, 1)} мм"
+
+    def __bool__(self):
+        """
+        Проверяет что объект дождь не пустой
+        """
+        return bool(self.all_rain)

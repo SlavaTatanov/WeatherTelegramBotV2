@@ -115,3 +115,12 @@ def inline_settings_feedback():
     keyboard.add(types.InlineKeyboardButton("Пожелания", callback_data=SETTINGS_FEED_FEATURE))
     keyboard.add(types.InlineKeyboardButton("Назад", callback_data=SETTINGS))
     return keyboard
+
+
+def inline_places():
+    """
+    Клавиатура добавления/удаления места
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_PLACES))
+    return keyboard
