@@ -122,6 +122,10 @@ class Weather:
         year, week, _ = self._cur_date.isocalendar()
         saturday = date.fromisocalendar(year, week, 6)
         sunday = date.fromisocalendar(year, week, 7)
+        # Если день воскресенье, вернем след выходные
+        if sunday == self._cur_date:
+            saturday = date.fromisocalendar(year, week + 1, 6)
+            sunday = date.fromisocalendar(year, week + 1, 7)
         return saturday, sunday
 
     def _day_formatting(self, day: dict):
