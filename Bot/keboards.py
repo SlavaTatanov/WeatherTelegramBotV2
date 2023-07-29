@@ -50,7 +50,7 @@ def inline_weather_type(weather_type=None):
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton("Краткий", callback_data=SHORT))
-    keyboard.add(types.InlineKeyboardButton("Обычный", callback_data=COMMON))
+    keyboard.add(types.InlineKeyboardButton("Подробный", callback_data=COMMON))
     return keyboard
 
 
@@ -86,7 +86,7 @@ def inline_admin_api_log():
     """
     Меню выбора типа логов:
     - Запросы за 5 дней
-    - Назад (Вернет к админ меню)
+    - Назад (Вернет к админ-меню)
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton("Запросы за 5 дней", callback_data=ADMIN_API_LOG_5))

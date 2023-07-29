@@ -184,8 +184,16 @@ class Weather:
         return msg
 
     @staticmethod
-    def _common_formatting(day: dict):
-        pass
+    def _common_formatting(day_info: dict):
+        time_2 = [v for k, v in day_info.items() if k[-5:] <= '03:00']
+        time_5 = [v for k, v in day_info.items() if '03:00' < k[-5:] <= '06:00']
+        time_8 = [v for k, v in day_info.items() if '06:00' < k[-5:] <= '09:00']
+        time_11 = [v for k, v in day_info.items() if '09:00' < k[-5:] <= '12:00']
+        time_14 = [v for k, v in day_info.items() if '12:00' < k[-5:] <= '15:00']
+        time_17 = [v for k, v in day_info.items() if '15:00' < k[-5:] <= '18:00']
+        time_20 = [v for k, v in day_info.items() if '18:00' < k[-5:] <= '21:00']
+        time_23 = [v for k,v in day_info.items() if '21:00' < k[-5:]]
+        return "Не реализовано"
 
     @staticmethod
     def _get_average_fields(data: list) -> dict[str, float]:
@@ -251,7 +259,7 @@ class Wind:
         """
         Скорость и порывы принимает в км/ч переводит в м/с
         """
-        speed = speed * 0.28
+        speed *= 0.28
         if gusts:
             gusts = round(gusts * 0.28, 1)
         self.speed = str(float(round(speed, 1)))
