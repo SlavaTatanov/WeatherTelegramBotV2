@@ -14,10 +14,7 @@ async def back_task():
         Weather.clean_api_cache()
         now = datetime.now()
         if now.hour == 23:
-            counter = req_counter.storage.get('API_REQ')
-            if counter:
-                obj = BotLogInfo(counter)
-            else:
-                obj = BotLogInfo(0)
+            counter = req_counter.storage.get('API_REQ', 0)
+            obj = BotLogInfo(counter)
             await obj.save()
-            req_counter.storage.pop('API_REQ')
+            req_counter.storage['API_REQ'] = 0
