@@ -103,3 +103,17 @@ class BotLogInfo(BaseModel):
         for it in res:
             res_msg += f"{it['date_log']} -> {it['api_req']}\n"
         return res_msg
+
+
+class Feedback(BaseModel):
+    """
+    Модель, описывающая обратную связь от пользователей
+    """
+    def __init__(self, user_id: int, kind: str, msg: str) -> None:
+        super().__init__("feedback")
+        self._id = user_id
+        self.kind = kind
+        self.date = date.today()
+        self.msg = msg
+
+
