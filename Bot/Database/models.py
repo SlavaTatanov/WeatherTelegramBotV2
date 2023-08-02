@@ -116,4 +116,3 @@ class Feedback(BaseModel):
         self.date = date.today()
         self.msg = msg
 
-
