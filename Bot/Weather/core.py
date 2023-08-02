@@ -139,28 +139,9 @@ class Weather:
         morning = [v for k, v in day_info.items() if "05:00" < k[-5:] <= "11:00"]
         day = [v for k, v in day_info.items() if "11:00" < k[-5:] <= "17:00"]
         evening = [v for k, v in day_info.items() if "17:00" < k[-5:] <= "23:00"]
-        info = {
-            "Ночь": {
-                "avg": self._get_average_fields(night),
-                "max": self._get_max_fields(night),
-                "sum": self._get_sum_fields(night)
-            },
-            "Утро": {
-                "avg": self._get_average_fields(morning),
-                "max": self._get_max_fields(morning),
-                "sum": self._get_sum_fields(morning)
-            },
-            "День": {
-                "avg": self._get_average_fields(day),
-                "max": self._get_max_fields(day),
-                "sum": self._get_sum_fields(day)
-            },
-            "Вечер": {
-                "avg": self._get_average_fields(evening),
-                "max": self._get_max_fields(evening),
-                "sum": self._get_sum_fields(evening)
-            }
-        }
+        info = self._get_avg_max_sum_min(
+            {"Ночь": night, "Утро": morning, "День": day, "Вечер": evening}
+        )
         msg = ""
         for k, v in info.items():
             clouds = Clouds(
@@ -182,6 +163,19 @@ class Weather:
                 msg += f"\n☔️ Дождь: {rain}"
             msg += "\n\n"
         return msg
+
+    def _get_avg_max_sum_min(self, info: dict):
+        """
+        Собирает словарь с минимальными, средними, и суммированными значениями
+        """
+        res = {}
+        for k, v in info.items():
+            res[k] = {
+                "avg": self._get_average_fields(v),
+                "max": self._get_max_fields(v),
+                "sum": self._get_sum_fields(v)
+            }
+        return res
 
     @staticmethod
     def _common_formatting(day_info: dict):
