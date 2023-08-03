@@ -135,6 +135,9 @@ class Weather:
             return self._common_formatting(day)
 
     def _short_formatting(self, day_info: dict):
+        """
+        Сообщение для короткого прогноза погоды
+        """
         night = [v for k, v in day_info.items() if k[-5:] <= "05:00"]
         morning = [v for k, v in day_info.items() if "05:00" < k[-5:] <= "11:00"]
         day = [v for k, v in day_info.items() if "11:00" < k[-5:] <= "17:00"]
@@ -142,6 +145,30 @@ class Weather:
         info = self._get_avg_max_sum_min(
             {"Ночь": night, "Утро": morning, "День": day, "Вечер": evening}
         )
+        msg = self._create_msg(info)
+        return msg
+
+    def _common_formatting(self, day_info: dict):
+        """
+        Сообщение для подробного прогноза погоды
+        """
+        time_2 = [v for k, v in day_info.items() if k[-5:] <= '03:00']
+        time_5 = [v for k, v in day_info.items() if '03:00' < k[-5:] <= '06:00']
+        time_8 = [v for k, v in day_info.items() if '06:00' < k[-5:] <= '09:00']
+        time_11 = [v for k, v in day_info.items() if '09:00' < k[-5:] <= '12:00']
+        time_14 = [v for k, v in day_info.items() if '12:00' < k[-5:] <= '15:00']
+        time_17 = [v for k, v in day_info.items() if '15:00' < k[-5:] <= '18:00']
+        time_20 = [v for k, v in day_info.items() if '18:00' < k[-5:] <= '21:00']
+        time_23 = [v for k, v in day_info.items() if '21:00' < k[-5:]]
+        info = self._get_avg_max_sum_min(
+            {"2:00": time_2, "5:00": time_5, "8:00": time_8, "11:00": time_11, "14:00": time_14,
+             "17:00": time_17, "20:00": time_20, "23:00": time_23}
+        )
+        msg = self._create_msg(info)
+        return msg
+
+    @staticmethod
+    def _create_msg(info):
         msg = ""
         for k, v in info.items():
             clouds = Clouds(
@@ -176,18 +203,6 @@ class Weather:
                 "sum": self._get_sum_fields(v)
             }
         return res
-
-    @staticmethod
-    def _common_formatting(day_info: dict):
-        time_2 = [v for k, v in day_info.items() if k[-5:] <= '03:00']
-        time_5 = [v for k, v in day_info.items() if '03:00' < k[-5:] <= '06:00']
-        time_8 = [v for k, v in day_info.items() if '06:00' < k[-5:] <= '09:00']
-        time_11 = [v for k, v in day_info.items() if '09:00' < k[-5:] <= '12:00']
-        time_14 = [v for k, v in day_info.items() if '12:00' < k[-5:] <= '15:00']
-        time_17 = [v for k, v in day_info.items() if '15:00' < k[-5:] <= '18:00']
-        time_20 = [v for k, v in day_info.items() if '18:00' < k[-5:] <= '21:00']
-        time_23 = [v for k,v in day_info.items() if '21:00' < k[-5:]]
-        return "Не реализовано"
 
     @staticmethod
     def _get_average_fields(data: list) -> dict[str, float]:
