@@ -66,7 +66,7 @@ class BotLogInfo(BaseModel):
     def __init__(self, api_req_counter: int | None = None):
         super().__init__("bot_log_info")
         self.date_log = str(date.today())
-        self.api_req = api_req_counter
+        self.api_req = str(api_req_counter)
 
     @staticmethod
     def _get_info(lim, sort_tag):
