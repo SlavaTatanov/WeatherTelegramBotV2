@@ -178,13 +178,15 @@ class Weather:
                 v["max"]["weathercode"]
             )
             wind = Wind(v["avg"]['windspeed_10m'], int(v['avg']['winddirection_10m']), v['max']['windgusts_10m'])
+            min_temp = int(v['min']['temperature_2m'])
             avg_temp = int(v['avg']['temperature_2m'])
             max_temp = int(v['max']['temperature_2m'])
             weather_code = WeatherCode(v["max"]["weathercode"])
             rain = Rain(v['sum']['rain'], v['sum']['showers'])
+            temp = Temperature(min_temp, max_temp, avg_temp)
             msg += f"<b>{k}</b> {clouds}\n" \
                    f"<i>{weather_code}</i>\n\n" \
-                   f"🌡 Температура: {avg_temp}℃ (max: {max_temp}℃)\n" \
+                   f"🌡 Темп.: {temp}\n" \
                    f"💨 Ветер: {wind}"
             if rain:
                 msg += f"\n☔️ Дождь: {rain}"
@@ -200,7 +202,8 @@ class Weather:
             res[k] = {
                 "avg": self._get_average_fields(v),
                 "max": self._get_max_fields(v),
-                "sum": self._get_sum_fields(v)
+                "sum": self._get_sum_fields(v),
+                "min": self._get_min_fields(v)
             }
         return res
 
@@ -227,6 +230,17 @@ class Weather:
             values = [item[field] for item in data]
             max_fields[field] = max(values)
         return max_fields
+
+    @staticmethod
+    def _get_min_fields(data: list):
+        """
+        Получаем минимальные значения
+        """
+        min_fields = {}
+        for field in data[0].keys():
+            values = [item[field] for item in data]
+            min_fields[field] = min(values)
+        return min_fields
 
     @staticmethod
     def _get_sum_fields(data: list):
@@ -436,3 +450,21 @@ class Rain:
         Проверяет что объект дождь не пустой
         """
         return bool(self.all_rain)
+
+
+class Temperature:
+    """
+    Класс формирующий строковое представление температуры
+    """
+    def __init__(self, min_temp, max_temp, avg_temp):
+        self.avg = avg_temp
+        if min_temp != max_temp:
+            self.min_max = f"(от {min_temp}℃ до {max_temp}℃)"
+        else:
+            self.min_max = None
+
+    def __str__(self):
+        msg = f"{self.avg}℃"
+        if self.min_max:
+            msg += f" {self.min_max}"
+        return msg
