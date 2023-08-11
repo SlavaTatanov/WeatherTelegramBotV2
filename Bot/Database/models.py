@@ -45,17 +45,49 @@ class UserInfo(BaseModel):
     def __init__(self, user_id: int, places: dict | None = None, in_db: bool = False):
         super().__init__("user_info")
         self._id = user_id
-        self.places = places
+        self._places = places
         # Определяем есть ли этот пользователь в БД
         self.__in_db = in_db
 
     @classmethod
-    def get_user(cls, user_id):
+    async def get_user(cls, user_id):
         """
         Запрос пользователя из БД
         """
-        query = mongo_db["user_info"].find_one({"_id": user_id})
-        return cls(user_id)
+        query = await mongo_db["user_info"].find_one({"_id": user_id})
+        if not query:
+            return cls(user_id)
+        places = query.get("_places", None)
+        return cls(user_id, places, in_db=True)
+
+    def add_place(self, name, coord):
+        """
+        Добавить место в профиль пользователя
+        """
+        if not self._places:
+            self._places = {}
+        self._places[name] = coord
+
+    def del_place(self, name):
+        """
+        Удалить место
+        """
+        if self._places:
+            if name in self._places:
+                del self._places[name]
+
+    async def save(self):
+        """
+        Метод сохранения или обновления данных в дб
+        """
+
+        # Если объекта еще нет в базе данных, то просто сохраняем
+        if not self.__in_db:
+            await super().save()
+            return
+        # Если объект есть, то просто меняем его на новый
+        obj = super()._get_mongo_dict()
+        await mongo_db["user_info"].replace_one({"_id": self._id}, obj)
 
 
 class BotLogInfo(BaseModel):
