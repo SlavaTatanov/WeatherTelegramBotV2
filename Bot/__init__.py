@@ -26,33 +26,6 @@ storage = MemoryStorage()
 bot = Bot(get_token(), parse_mode="HTML")
 dp = Dispatcher(bot, storage=storage)
 
-# Регистрация handlers
-# -- settings --
-dp.register_message_handler(view_settings.settings_menu, commands=["settings"], state="*")
-dp.register_callback_query_handler(view_settings.settings_menu_callback,
-                                   lambda callback: callback.data == SETTINGS, state="*")
-dp.register_callback_query_handler(view_settings.settings_places_menu,
-                                   lambda callback: callback.data == SETTINGS_PLACES, state="*")
-dp.register_callback_query_handler(view_settings.settings_feed_menu,
-                                   lambda callback: callback.data == SETTINGS_FEEDBACK, state="*")
-dp.register_callback_query_handler(view_settings.settings_place_add,
-                                   lambda callback: callback.data == SETTINGS_PLC_ADD, state="*")
-
-# -- admin --
-dp.register_callback_query_handler(view_admin.admin_menu,
-                                   lambda callback: callback.data == ADMIN_MENU, state="*")
-dp.register_callback_query_handler(view_admin.admin_log_api,
-                                   lambda callback: callback.data == ADMIN_API_LOG, state="*")
-dp.register_callback_query_handler(view_admin.admin_api_log_5_day,
-                                   lambda callback: callback.data == ADMIN_API_LOG_5, state="*")
-dp.register_callback_query_handler(view_admin.admin_api_log_max,
-                                   lambda callback: callback.data == ADMIN_API_LOG_MAX, state="*")
-
-
-async def set_commands(disp: Dispatcher):
-    await disp.bot.set_my_commands([BotCommand("weather", "Погода"),
-                                    BotCommand("settings", "Настройки")])
-
 
 # Создаем классы для машины состояний
 class WeatherState(StatesGroup):
@@ -69,4 +42,38 @@ class UserPlaces(StatesGroup):
     Состояния для добавления мест
     """
     places_add = State()
+    places_add_coord = State()
     place_del = State()
+
+
+# Регистрация handlers
+# -- settings --
+dp.register_message_handler(view_settings.settings_menu, commands=["settings"], state="*")
+dp.register_callback_query_handler(view_settings.settings_menu_callback,
+                                   lambda callback: callback.data == SETTINGS, state="*")
+dp.register_callback_query_handler(view_settings.settings_places_menu,
+                                   lambda callback: callback.data == SETTINGS_PLACES, state="*")
+dp.register_callback_query_handler(view_settings.settings_feed_menu,
+                                   lambda callback: callback.data == SETTINGS_FEEDBACK, state="*")
+dp.register_callback_query_handler(view_settings.settings_place_add,
+                                   lambda callback: callback.data == SETTINGS_PLC_ADD, state="*")
+dp.register_message_handler(view_settings.settings_place_add_coord, content_types=['text'],
+                            state=UserPlaces.places_add)
+dp.register_message_handler(view_settings.settings_place_add_final, content_types=['location'],
+                            state=UserPlaces.places_add_coord)
+
+# -- admin --
+dp.register_callback_query_handler(view_admin.admin_menu,
+                                   lambda callback: callback.data == ADMIN_MENU, state="*")
+dp.register_callback_query_handler(view_admin.admin_log_api,
+                                   lambda callback: callback.data == ADMIN_API_LOG, state="*")
+dp.register_callback_query_handler(view_admin.admin_api_log_5_day,
+                                   lambda callback: callback.data == ADMIN_API_LOG_5, state="*")
+dp.register_callback_query_handler(view_admin.admin_api_log_max,
+                                   lambda callback: callback.data == ADMIN_API_LOG_MAX, state="*")
+
+
+async def set_commands(disp: Dispatcher):
+    await disp.bot.set_my_commands([BotCommand("weather", "Погода"),
+                                    BotCommand("settings", "Настройки")])
+

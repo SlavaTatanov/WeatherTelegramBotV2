@@ -50,7 +50,7 @@ class UserInfo(BaseModel):
         self.__in_db = in_db
 
     @classmethod
-    async def get_user(cls, user_id):
+    async def get_user(cls, user_id) -> 'UserInfo':
         """
         Запрос пользователя из БД
         """
@@ -88,6 +88,15 @@ class UserInfo(BaseModel):
         # Если объект есть, то просто меняем его на новый
         obj = super()._get_mongo_dict()
         await mongo_db["user_info"].replace_one({"_id": self._id}, obj)
+
+    def get_places_names(self) -> list:
+        """
+        Получить список мест
+        """
+        if self._places:
+            return [k for k, v in self._places.items()]
+        else:
+            return []
 
 
 class BotLogInfo(BaseModel):

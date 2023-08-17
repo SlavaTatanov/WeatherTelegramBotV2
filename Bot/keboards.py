@@ -120,6 +120,7 @@ def inline_settings_feedback():
 def inline_places():
     """
     Клавиатура добавления/удаления места
+    - Отмена
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_PLACES))

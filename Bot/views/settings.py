@@ -2,6 +2,8 @@ from aiogram import types
 from Bot.keboards import inline_settings_menu, inline_settings_places, inline_settings_feedback, inline_places
 import Bot
 from Bot.utils import state_clean_with_messages, state_save_related_msg
+from aiogram.dispatcher import FSMContext
+from Bot.Database.models import UserInfo
 
 
 # /settings
@@ -48,3 +50,27 @@ async def settings_place_add(callback: types.CallbackQuery):
     state = Bot.dp.current_state(user=callback.from_user.id)
     # Запоминаем связанное с состоянием сообщение
     await state_save_related_msg(state, msg)
+
+
+# message - text, state - UserPlaces.places_add
+async def settings_place_add_coord(message: types.Message, state: FSMContext):
+    await message.answer(f'Отправьте гео-позицию места для "{message.text}"', reply_markup=inline_places())
+    await Bot.UserPlaces.places_add_coord.set()
+    async with state.proxy() as data:
+        data['place_name'] = message.text
+
+
+# message - location, state - UserPlaces.places_add_coord
+async def settings_place_add_final(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        place_name = data['place_name']
+        coord = (message.location.latitude, message.location.longitude)
+        user_id = message.from_user.id
+
+        # Берем инфу для пользователя, добавляем место, сохраняем
+        user_info = await UserInfo.get_user(user_id)
+        user_info.add_place(place_name, coord)
+        await user_info.save()
+        await message.answer(f'Место "{place_name}" успешно добавлено!')
+    await state.finish()
+
