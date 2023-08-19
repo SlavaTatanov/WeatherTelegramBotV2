@@ -3,7 +3,7 @@ import datetime
 from aiogram import types
 from Bot.CALLBACKS import CURRENT, FIVE_DAY, WEEKEND, SHORT, COMMON, TOMORROW, CURRENT_PLACE, ADMIN_MENU, \
     ADMIN_API_LOG, EXIT, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, SETTINGS_PLACES, SETTINGS_FEEDBACK, \
-    SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_FEED_BAG, SETTINGS_FEED_FEATURE
+    SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_FEED_BAG, SETTINGS_FEED_FEATURE, SETTINGS_PLC_DEL_CONFIRM
 from Bot.config import OWNERS
 from Bot.utils import is_sunday
 
@@ -123,5 +123,27 @@ def inline_places():
     - Отмена
     """
     keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_PLACES))
+    return keyboard
+
+
+def inline_places_del(places: list) -> types.InlineKeyboardMarkup:
+    """
+    Клавиатура мест для удаленияЖ
+    - Место 1
+    - Место 2
+    - Отмена
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    for place in places:
+        btn = types.InlineKeyboardButton(place, callback_data=place)
+        keyboard.add(btn)
+    keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_PLACES))
+    return keyboard
+
+
+def inline_places_del_confirm():
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Да", callback_data=SETTINGS_PLC_DEL_CONFIRM))
     keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_PLACES))
     return keyboard

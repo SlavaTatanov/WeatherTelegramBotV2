@@ -7,7 +7,7 @@ from Bot.config import TOKEN, DEVELOPMENT, TEST_TOKEN
 import Bot.views.settings as view_settings
 import Bot.views.admin as view_admin
 from Bot.CALLBACKS import ADMIN_MENU, ADMIN_API_LOG, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, \
-    SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD
+    SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_PLC_DEL_CONFIRM
 
 
 def get_token() -> str:
@@ -44,6 +44,7 @@ class UserPlaces(StatesGroup):
     places_add = State()
     places_add_coord = State()
     place_del = State()
+    place_del_name = State()
 
 
 # Регистрация handlers
@@ -61,6 +62,13 @@ dp.register_message_handler(view_settings.settings_place_add_coord, content_type
                             state=UserPlaces.places_add)
 dp.register_message_handler(view_settings.settings_place_add_final, content_types=['location'],
                             state=UserPlaces.places_add_coord)
+dp.register_callback_query_handler(view_settings.settings_place_del,
+                                   lambda callback: callback.data == SETTINGS_PLC_DEL, state="*")
+dp.register_callback_query_handler(view_settings.settings_place_del_confirm,
+                                   state=UserPlaces.place_del)
+dp.register_callback_query_handler(view_settings.settings_place_del_final,
+                                   lambda callback: callback.data == SETTINGS_PLC_DEL_CONFIRM,
+                                   state=UserPlaces.place_del_name)
 
 # -- admin --
 dp.register_callback_query_handler(view_admin.admin_menu,

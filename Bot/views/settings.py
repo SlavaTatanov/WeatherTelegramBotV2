@@ -1,5 +1,6 @@
 from aiogram import types
-from Bot.keboards import inline_settings_menu, inline_settings_places, inline_settings_feedback, inline_places
+from Bot.keboards import (inline_settings_menu, inline_settings_places, inline_settings_feedback,
+                          inline_places, inline_places_del, inline_places_del_confirm)
 import Bot
 from Bot.utils import state_clean_with_messages, state_save_related_msg
 from aiogram.dispatcher import FSMContext
@@ -72,5 +73,44 @@ async def settings_place_add_final(message: types.Message, state: FSMContext):
         user_info.add_place(place_name, coord)
         await user_info.save()
         await message.answer(f'Место "{place_name}" успешно добавлено!')
-    await state.finish()
+    await state_clean_with_messages(message.from_user.id)
+
+
+# callback = SETTINGS_PLC_DEL
+async def settings_place_del(callback: types.CallbackQuery, state: FSMContext):
+    # Чистим предыдущие состояния перед установкой своего
+    await state_clean_with_messages(callback.from_user.id)
+    # Устанавливаем новое состояние
+    await Bot.UserPlaces.place_del.set()
+    # Получаем информацию для юзера из БД и берем его места для клавиатуры
+    user_info = await UserInfo.get_user(callback.from_user.id)
+    places_list = user_info.get_places_names()
+    keyboard = inline_places_del(places_list)
+    msg = await callback.message.edit_text("Выберете место для удаления",
+                                           reply_markup=keyboard)
+    # Запоминаем связанное с состоянием сообщение
+    await state_save_related_msg(state, msg)
+
+
+# callback - text, state - UserPlaces.places_del
+async def settings_place_del_confirm(callback: types.CallbackQuery, state: FSMContext):
+    place = callback.data
+    keyboard = inline_places_del_confirm()
+    async with state.proxy() as data:
+        data['place_name_del'] = place
+    await callback.message.edit_text(f"Вы точно хотите удалить {place}?", reply_markup=keyboard)
+    await Bot.UserPlaces.place_del_name.set()
+
+
+# callback - SETTINGS_PLC_DEL_CONFIRM, state - UserPlaces.place_del_name
+async def settings_place_del_final(callback: types.CallbackQuery, state: FSMContext):
+    user_info = await UserInfo.get_user(callback.from_user.id)
+    async with state.proxy() as data:
+        place = data['place_name_del']
+        user_info.del_place(place)
+        await user_info.save()
+        await Bot.bot.send_message(callback.from_user.id, f"{place} успешно удалено!")
+    await state_clean_with_messages(callback.from_user.id)
+
+
 

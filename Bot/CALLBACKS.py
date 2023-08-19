@@ -22,6 +22,7 @@ SETTINGS_PLACES = 'settings_places'
 SETTINGS_FEEDBACK = 'settings_feedback'
 SETTINGS_PLC_ADD = 'settings_place_add'
 SETTINGS_PLC_DEL = 'settings_place_del'
+SETTINGS_PLC_DEL_CONFIRM = 'settings_place_del_confirm'
 SETTINGS_FEED_BAG = 'settings_feedback_bag'
 SETTINGS_FEED_FEATURE = 'settings_feedback_feature'
 FEEDBACK = [SETTINGS_FEED_FEATURE, SETTINGS_FEED_BAG]
