@@ -11,6 +11,8 @@ class BaseModel:
     При наследовании вызвать метод init и передать в него имя коллекции с которой работает модель.
     """
 
+    DB = mongo_db
+
     def __init__(self, collection):
         self.__collection = collection
 
@@ -26,7 +28,7 @@ class BaseModel:
 
     async def save(self):
         obj = self._get_mongo_dict()
-        await mongo_db[self.__collection].insert_one(obj)
+        await self.DB[self.__collection].insert_one(obj)
 
 
 class UserInfo(BaseModel):
@@ -54,7 +56,7 @@ class UserInfo(BaseModel):
         """
         Запрос пользователя из БД
         """
-        query = await mongo_db["user_info"].find_one({"_id": user_id})
+        query = await BaseModel.DB["user_info"].find_one({"_id": user_id})
         if not query:
             return cls(user_id)
         places = query.get("_places", None)
@@ -87,7 +89,7 @@ class UserInfo(BaseModel):
             return
         # Если объект есть, то просто меняем его на новый
         obj = super()._get_mongo_dict()
-        await mongo_db["user_info"].replace_one({"_id": self._id}, obj)
+        await self.DB["user_info"].replace_one({"_id": self._id}, obj)
 
     def get_places_names(self) -> list:
         """
@@ -109,9 +111,8 @@ class BotLogInfo(BaseModel):
         self.date_log = str(date.today())
         self.api_req = str(api_req_counter)
 
-    @staticmethod
-    def _get_info(lim, sort_tag):
-        res = mongo_db["bot_log_info"].find().sort(sort_tag, -1).limit(lim)
+    def _get_info(self, lim, sort_tag):
+        res = self.DB["bot_log_info"].find().sort(sort_tag, -1).limit(lim)
         return res
 
     @classmethod
@@ -156,4 +157,3 @@ class Feedback(BaseModel):
         self.kind = kind
         self.date = date.today()
         self.msg = msg
-
