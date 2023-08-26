@@ -111,8 +111,9 @@ class BotLogInfo(BaseModel):
         self.date_log = str(date.today())
         self.api_req = str(api_req_counter)
 
-    def _get_info(self, lim, sort_tag):
-        res = self.DB["bot_log_info"].find().sort(sort_tag, -1).limit(lim)
+    @classmethod
+    def _get_info(cls, lim, sort_tag):
+        res = cls.DB["bot_log_info"].find().sort(sort_tag, -1).limit(lim)
         return res
 
     @classmethod
