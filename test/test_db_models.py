@@ -1,6 +1,6 @@
 import unittest
-from Bot.Database.models import BaseModel
-from Bot import *
+from mongomock_motor import AsyncMongoMockClient
+from Bot.Database.models import BaseModel, UserInfo, BotLogInfo, Feedback
 
 
 class TestDataBaseModel(unittest.TestCase):
@@ -11,3 +11,33 @@ class TestDataBaseModel(unittest.TestCase):
 
     def test_db_model(self):
         self.assertEqual(self.obj._get_mongo_dict(), {"attr": 1})
+
+
+class TestUserInfoModel(unittest.IsolatedAsyncioTestCase):
+
+    async def asyncSetUp(self) -> None:
+        # Меняем базу данных для базового класса и передаем ей мок
+        BaseModel.DB = AsyncMongoMockClient()["test_db"]
+        self.obj = UserInfo(100)
+        self.obj.add_place("test_place", (100, 100))
+        await self.obj.save()
+
+    async def test_01_get_places_names(self):
+        # Место было
+        user = await UserInfo.get_user(100)
+        self.assertEqual(user.get_places_names(), ["test_place"])
+
+    async def test_02_del_place(self):
+        user = await UserInfo.get_user(100)
+        user.del_place("test_place")
+        await user.save()
+        user_new = await UserInfo.get_user(100)
+        self.assertEqual(user_new.get_places_names(), [])
+
+    async def test_03_add_place(self):
+        user = await UserInfo.get_user(100)
+        user.add_place("test_place_2", (100, 10))
+        await user.save()
+
+        user_new = await UserInfo.get_user(100)
+        self.assertEqual(user_new.get_places_names(), ["test_place", "test_place_2"])
