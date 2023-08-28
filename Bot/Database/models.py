@@ -40,8 +40,8 @@ class UserInfo(BaseModel):
     Сохраняем obj.save()
 
     Получаем объект по id пользователя: UserInfo.get_user(2340)
-    Меняем его
-    Сохраняем obj.save()
+    Меняем его.
+    Сохраняем obj.save().
     """
 
     def __init__(self, user_id: int, places: dict | None = None, in_db: bool = False):
@@ -99,6 +99,12 @@ class UserInfo(BaseModel):
             return [k for k, v in self._places.items()]
         else:
             return []
+
+    def get_place_coord(self, place_name):
+        """
+        Получить координаты места
+        """
+        return self._places[place_name]
 
 
 class BotLogInfo(BaseModel):

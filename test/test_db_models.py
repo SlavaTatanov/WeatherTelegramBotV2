@@ -23,7 +23,7 @@ class TestUserInfoModel(unittest.IsolatedAsyncioTestCase):
         await self.obj.save()
 
     async def test_01_get_places_names(self):
-        # Место было
+        # Место было, проверяем метод, который возвращает список мест
         user = await UserInfo.get_user(100)
         self.assertEqual(user.get_places_names(), ["test_place"])
 
@@ -35,9 +35,17 @@ class TestUserInfoModel(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(user_new.get_places_names(), [])
 
     async def test_03_add_place(self):
+        # Проверяем добавление мест
         user = await UserInfo.get_user(100)
         user.add_place("test_place_2", (100, 10))
         await user.save()
 
         user_new = await UserInfo.get_user(100)
         self.assertEqual(user_new.get_places_names(), ["test_place", "test_place_2"])
+
+    async def test_04_get_coord(self):
+        """
+        Проверяем функцию получения координат по месту
+        """
+        user = await UserInfo.get_user(100)
+        self.assertEqual(user.get_place_coord('test_place'), [100, 100])
