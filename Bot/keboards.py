@@ -35,12 +35,14 @@ def inline_get_weather_type(day: datetime.date) -> types.InlineKeyboardMarkup:
     return keyboard
 
 
-def inline_get_weather_places(places: dict = None) -> types.InlineKeyboardMarkup:
+def inline_get_weather_places(places: list) -> types.InlineKeyboardMarkup:
     """
     Клавиатура для выбора геопозиции
     """
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(types.InlineKeyboardButton("Текущее место", callback_data=CURRENT_PLACE))
+    for place in places:
+        keyboard.add(types.InlineKeyboardButton(place, callback_data=place))
     return keyboard
 
 
@@ -129,7 +131,7 @@ def inline_places():
 
 def inline_places_del(places: list) -> types.InlineKeyboardMarkup:
     """
-    Клавиатура мест для удаленияЖ
+    Клавиатура мест для удаления
     - Место 1
     - Место 2
     - Отмена

@@ -9,6 +9,7 @@ from Bot.Weather.core import Weather
 from Bot.background_task import back_task
 from Bot.Database import create_indexes
 from Bot.utils import state_save_related_msg, state_clean_with_messages
+from Bot.Database.models import UserInfo
 
 
 @dp.message_handler(commands=['start'])
@@ -68,8 +69,12 @@ async def weather_type(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["type"] = callback.data
     await WeatherState.next()
+    # Получаем список мест юзера
+    user_id = callback.from_user.id
+    user = await UserInfo.get_user(user_id)
+    places = user.get_places_names()
     await callback.message.edit_text("Отправьте гео-позицию или выберете из списка",
-                                     reply_markup=inline_get_weather_places())
+                                     reply_markup=inline_get_weather_places(places))
 
 
 @dp.callback_query_handler(lambda callback: callback.data == CURRENT_PLACE, state=WeatherState.weather_place)
@@ -78,6 +83,11 @@ async def current_place(callback: types.CallbackQuery, state: FSMContext):
         data["weather_type"] = callback.data
         data["location_req"] = await bot.send_message(callback.from_user.id, "Укажите геопозицию",
                                                       reply_markup=replay_get_location())
+
+
+@dp.callback_query_handler(lambda callback: callback.data != CURRENT_PLACE, state=WeatherState.weather_place)
+async def current_place_from_user(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.edit_text(f"Погода для {callback.data}")
 
 
 @dp.message_handler(content_types=["location"], state=WeatherState.weather_place)
