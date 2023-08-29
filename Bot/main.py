@@ -87,7 +87,28 @@ async def current_place(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda callback: callback.data != CURRENT_PLACE, state=WeatherState.weather_place)
 async def current_place_from_user(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(f"Погода для {callback.data}")
+    # Получаем инфу юзера, и координаты места
+    user_info = await UserInfo.get_user(callback.from_user.id)
+    place_coord = tuple(user_info.get_place_coord(callback.data))
+
+    async with state.proxy() as data:
+        res = Weather(place_coord, data["start_date"], data["type"])
+
+        # Отвечаем юзеру в зависимости от типа погоды
+        if data["weather_time"] == CURRENT:
+            res_msg = await res.current_weather()
+            await callback.message.edit_text(res_msg)
+        elif data["weather_time"] == TOMORROW:
+            res_msg = await res.tomorrow_weather()
+            await callback.message.edit_text(res_msg)
+        elif data["weather_time"] == FIVE_DAY:
+            async for msg in res.five_day_weather():
+                await callback.message.edit_text(msg)
+        elif data["weather_time"] == WEEKEND:
+            async for msg in res.weekend_weather():
+                await callback.message.edit_text(msg)
+        else:
+            await callback.answer("Что то пошло не так!")
 
 
 @dp.message_handler(content_types=["location"], state=WeatherState.weather_place)
