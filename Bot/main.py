@@ -97,18 +97,19 @@ async def current_place_from_user(callback: types.CallbackQuery, state: FSMConte
         # Отвечаем юзеру в зависимости от типа погоды
         if data["weather_time"] == CURRENT:
             res_msg = await res.current_weather()
-            await callback.message.edit_text(res_msg)
+            await bot.send_message(callback.from_user.id, res_msg)
         elif data["weather_time"] == TOMORROW:
             res_msg = await res.tomorrow_weather()
-            await callback.message.edit_text(res_msg)
+            await bot.send_message(callback.from_user.id, res_msg)
         elif data["weather_time"] == FIVE_DAY:
             async for msg in res.five_day_weather():
-                await callback.message.edit_text(msg)
+                await bot.send_message(callback.from_user.id, msg)
         elif data["weather_time"] == WEEKEND:
             async for msg in res.weekend_weather():
-                await callback.message.edit_text(msg)
+                await bot.send_message(callback.from_user.id, msg)
         else:
             await callback.answer("Что то пошло не так!")
+    await callback.message.delete()
 
 
 @dp.message_handler(content_types=["location"], state=WeatherState.weather_place)
