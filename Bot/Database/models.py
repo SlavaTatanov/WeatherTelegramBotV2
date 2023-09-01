@@ -119,7 +119,26 @@ class BotLogInfo(BaseModel):
 
     @classmethod
     def _get_info(cls, lim, sort_tag):
-        res = cls.DB["bot_log_info"].find().sort(sort_tag, -1).limit(lim)
+        """
+        Функция, которая составляет запрос к базе данных MongoDB.
+        В нем есть агрегация запроса, в которой строковые значения парсятся в числа.
+        """
+        pipeline = [{
+            '$project': {
+                'api_req_number': {
+                    '$function': {
+                        'body': 'function(str) {return parseInt(str);}',
+                        'args': ['$api_req'],
+                        'lang': 'js'
+                    }
+                },
+                'date_log': 1,
+                'api_req': 1,
+            }
+        }, {'$sort': {sort_tag: -1}},
+            {'$limit': lim}
+        ]
+        res = cls.DB["bot_log_info"].aggregate(pipeline)
         return res
 
     @classmethod
@@ -136,7 +155,7 @@ class BotLogInfo(BaseModel):
         """
         Дни с максимальным количеством запросов
         """
-        req = cls._get_info(5, "api_req")
+        req = cls._get_info(5, 'api_req_number')
         res = await cls.create_msg(req)
         return res
 
