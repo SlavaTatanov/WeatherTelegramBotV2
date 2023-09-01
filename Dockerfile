@@ -16,7 +16,8 @@ WORKDIR /app
 # Копируем файлы зависимостей
 COPY requirements.txt .
 
-# Устанавливаем зависимости
+# Устанавливаем зависимости перед этим обновив pip
+RUN pip3 install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем файлы приложения
