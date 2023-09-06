@@ -6,8 +6,10 @@ from os import getenv
 from Bot.config import TOKEN, DEVELOPMENT, TEST_TOKEN
 import Bot.views.settings as view_settings
 import Bot.views.admin as view_admin
+import Bot.views.weather as view_weather
 from Bot.CALLBACKS import ADMIN_MENU, ADMIN_API_LOG, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, \
-    SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_PLC_DEL_CONFIRM
+    SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_PLC_DEL_CONFIRM, WEATHER_TIMES, \
+    FREQUENCY
 
 
 def get_token() -> str:
@@ -48,6 +50,16 @@ class UserPlaces(StatesGroup):
 
 
 # Регистрация handlers
+
+# -- weather --
+dp.register_message_handler(view_weather.weather, commands=["weather"], state="*")
+dp.register_callback_query_handler(view_weather.weather_time,
+                                   lambda callback: callback.data in WEATHER_TIMES,
+                                   state=WeatherState.weather_time)
+dp.register_callback_query_handler(view_weather.weather_type,
+                                   lambda callback: callback.data in FREQUENCY,
+                                   state=WeatherState.weather_type)
+
 # -- settings --
 dp.register_message_handler(view_settings.settings_menu, commands=["settings"], state="*")
 dp.register_callback_query_handler(view_settings.settings_menu_callback,
@@ -84,4 +96,3 @@ dp.register_callback_query_handler(view_admin.admin_api_log_max,
 async def set_commands(disp: Dispatcher):
     await disp.bot.set_my_commands([BotCommand("weather", "Погода"),
                                     BotCommand("settings", "Настройки")])
-
