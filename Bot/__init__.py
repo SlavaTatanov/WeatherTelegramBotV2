@@ -9,7 +9,7 @@ import Bot.views.admin as view_admin
 import Bot.views.weather as view_weather
 from Bot.CALLBACKS import ADMIN_MENU, ADMIN_API_LOG, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, \
     SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_PLC_DEL_CONFIRM, WEATHER_TIMES, \
-    FREQUENCY
+    FREQUENCY, CURRENT_PLACE
 
 
 def get_token() -> str:
@@ -59,6 +59,14 @@ dp.register_callback_query_handler(view_weather.weather_time,
 dp.register_callback_query_handler(view_weather.weather_type,
                                    lambda callback: callback.data in FREQUENCY,
                                    state=WeatherState.weather_type)
+dp.register_callback_query_handler(view_weather.current_place,
+                                   lambda callback: callback.data == CURRENT_PLACE,
+                                   state=WeatherState.weather_place)
+dp.register_callback_query_handler(view_weather.current_place_from_user,
+                                   lambda callback: callback.data != CURRENT_PLACE,
+                                   state=WeatherState.weather_place)
+dp.register_message_handler(view_weather.weather_place, content_types=['location'],
+                            state=WeatherState.weather_place)
 
 # -- settings --
 dp.register_message_handler(view_settings.settings_menu, commands=["settings"], state="*")
