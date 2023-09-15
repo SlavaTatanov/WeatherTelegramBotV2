@@ -103,4 +103,5 @@ dp.register_callback_query_handler(view_admin.admin_api_log_max,
 
 async def set_commands(disp: Dispatcher):
     await disp.bot.set_my_commands([BotCommand("weather", "Погода"),
-                                    BotCommand("settings", "Настройки")])
+                                    BotCommand("settings", "Настройки"),
+                                    BotCommand("help", "Помощь")])

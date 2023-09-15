@@ -17,6 +17,15 @@ async def start(message: types.Message):
     await message.answer(answer_for_user)
 
 
+@dp.message_handler(commands=['help'], state="*")
+async def help_command(message: types.Message):
+    answer_for_user = ("Данный бот предоставляет прогноз погоды.\n\n"
+                       "/weather - Для того чтобы узнать прогноз погоды.\n\n"
+                       "/settings - Для того чтобы воспользоваться настройками. Можно добавить избранные места"
+                       ", а так же поделится обратной связью с разработчиками.")
+    await message.answer(answer_for_user)
+
+
 @dp.callback_query_handler(lambda callback: callback.data == EXIT, state="*")
 async def exit_menu(callback: types.CallbackQuery):
     await callback.message.delete()
