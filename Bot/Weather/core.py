@@ -12,10 +12,11 @@ class Weather:
     Получить погоду на сегодня Weather.current_weather()
     Получить погоду на завтра Weather.tomorrow_weather()
     """
-    def __init__(self, coord, cur_date, weather_type):
+    def __init__(self, coord, cur_date, weather_type, place_name=None):
         self.coord = coord
         self._cur_date = cur_date
         self._weather_type = weather_type
+        self.place_name = place_name
 
     @staticmethod
     @alru_cache(maxsize=15)
@@ -72,7 +73,7 @@ class Weather:
         """
         req = await self._get_weather()
         res = self._filter_data_by_date(self._cur_date, req)
-        res_header = self._date_formatting(self._cur_date) + "\n\n"
+        res_header = self._header_create(self._cur_date)
         res_body = self._day_formatting(res)
         return res_header + res_body
 
@@ -83,7 +84,7 @@ class Weather:
         req = await self._get_weather()
         tomorrow = self._cur_date + timedelta(days=1)
         res = self._filter_data_by_date(tomorrow, req)
-        res_header = self._date_formatting(tomorrow) + "\n\n"
+        res_header = self._header_create(tomorrow)
         res_body = self._day_formatting(res)
         return res_header + res_body
 
@@ -95,7 +96,7 @@ class Weather:
         saturday, sunday = self._weekend_days()
         for day in (saturday, sunday):
             res = self._filter_data_by_date(day, req)
-            res_header = self._date_formatting(day) + "\n\n"
+            res_header = self._header_create(day)
             res_body = self._day_formatting(res)
             yield res_header + res_body
 
@@ -111,9 +112,19 @@ class Weather:
         five = self._cur_date + timedelta(days=4)
         for day in (first, second, third, fourth, five):
             res = self._filter_data_by_date(day, req)
-            res_header = self._date_formatting(day) + "\n\n"
+            res_header = self._header_create(day)
             res_body = self._day_formatting(res)
             yield res_header + res_body
+
+    def _header_create(self, day_in_msg):
+        """
+        Создает шапку сообщения, если есть имя места то добавляет его
+        """
+        header = self._date_formatting(day_in_msg)
+        if self.place_name:
+            header += "\n"
+            header += self.place_name
+        return header + "\n\n"
 
     def _weekend_days(self) -> tuple[date, date]:
         """

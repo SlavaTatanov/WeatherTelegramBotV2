@@ -90,9 +90,10 @@ async def current_place_from_user(callback: types.CallbackQuery, state: FSMConte
     # Получаем инфу юзера, и координаты места
     user_info = await UserInfo.get_user(callback.from_user.id)
     place_coord = tuple(user_info.get_place_coord(callback.data))
+    place_name = callback.data
 
     async with state.proxy() as data:
-        res = Weather(place_coord, data["start_date"], data["type"])
+        res = Weather(place_coord, data["start_date"], data["type"], place_name=place_name)
 
         # Отвечаем юзеру в зависимости от типа погоды
         if data["weather_time"] == CURRENT:
