@@ -4,6 +4,7 @@ from Bot import dp, set_commands
 from Bot.CALLBACKS import EXIT
 from Bot.background_task import back_task
 from Bot.Database import create_indexes
+from Bot.geocoder.geocoder import get_place_coord
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -33,7 +34,12 @@ async def exit_menu(callback: types.CallbackQuery):
 
 @dp.message_handler(commands=["test"])
 async def test(message: types.Message):
-    pass
+    res = await get_place_coord("Челябинскыая область, увильды")
+    if res:
+        msg = await message.answer_location(res['lat'], res['lon'])
+        await msg.reply(res['place'])
+    else:
+        await message.answer("Что то пошло не так")
 
 
 # Запускаем бота и фоновую задачу
