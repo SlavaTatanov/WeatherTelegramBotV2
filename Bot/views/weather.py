@@ -111,6 +111,7 @@ async def current_place_from_user(callback: types.CallbackQuery, state: FSMConte
         else:
             await callback.answer("Что то пошло не так!")
     await callback.message.delete()
+    await state.finish()
 
 
 # location
