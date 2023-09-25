@@ -149,3 +149,12 @@ def inline_places_del_confirm():
     keyboard.add(types.InlineKeyboardButton("Да", callback_data=SETTINGS_PLC_DEL_CONFIRM))
     keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_PLACES))
     return keyboard
+
+
+def inline_feedback_cancel():
+    """
+    Отмена
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Отмена", callback_data=SETTINGS_FEEDBACK))
+    return keyboard

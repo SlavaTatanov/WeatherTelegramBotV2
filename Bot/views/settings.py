@@ -1,6 +1,6 @@
 from aiogram import types
 from Bot.keboards import (inline_settings_menu, inline_settings_places, inline_settings_feedback,
-                          inline_places, inline_places_del, inline_places_del_confirm)
+                          inline_places, inline_places_del, inline_places_del_confirm, inline_feedback_cancel)
 import Bot
 from Bot.utils import state_clean_with_messages, state_save_related_msg
 from aiogram.dispatcher import FSMContext
@@ -113,4 +113,12 @@ async def settings_place_del_final(callback: types.CallbackQuery, state: FSMCont
     await state_clean_with_messages(callback.from_user.id)
 
 
+# callback - SETTINGS_FEED_BAG, state - all
+async def feedback_bag(callback: types.CallbackQuery):
+    await callback.message.edit_text("Опишите ошибку", reply_markup=inline_feedback_cancel())
 
+
+# callback - SETTINGS_FEED_FEATURE, state - all
+async def feedback_feature(callback: types.CallbackQuery):
+    await callback.message.edit_text("Опишите какой функционал вы бы еще хотели увидеть в боте",
+                                     reply_markup=inline_feedback_cancel())
