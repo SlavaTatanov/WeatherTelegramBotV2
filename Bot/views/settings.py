@@ -4,7 +4,7 @@ from Bot.keboards import (inline_settings_menu, inline_settings_places, inline_s
 import Bot
 from Bot.utils import state_clean_with_messages, state_save_related_msg
 from aiogram.dispatcher import FSMContext
-from Bot.Database.models import UserInfo
+from Bot.Database.models import UserInfo, Feedback
 
 
 # /settings
@@ -36,6 +36,7 @@ async def settings_places_menu(callback: types.CallbackQuery):
 # callback = SETTINGS_FEEDBACK
 async def settings_feed_menu(callback: types.CallbackQuery):
     user_id = callback.from_user.id
+    await state_clean_with_messages(user_id)
     await callback.message.edit_text("Сообщите об ошибке или опишите какой"
                                      " функционал вы бы хотели увидеть в боте",
                                      reply_markup=inline_settings_feedback())
@@ -115,10 +116,36 @@ async def settings_place_del_final(callback: types.CallbackQuery, state: FSMCont
 
 # callback - SETTINGS_FEED_BAG, state - all
 async def feedback_bag(callback: types.CallbackQuery):
+    await Bot.Feedback.bug.set()
     await callback.message.edit_text("Опишите ошибку", reply_markup=inline_feedback_cancel())
 
 
 # callback - SETTINGS_FEED_FEATURE, state - all
 async def feedback_feature(callback: types.CallbackQuery):
+    await Bot.Feedback.feature.set()
     await callback.message.edit_text("Опишите какой функционал вы бы еще хотели увидеть в боте",
                                      reply_markup=inline_feedback_cancel())
+
+
+# message - text, state - Feedback.feature
+async def feedback_text(message: types.Message, state: FSMContext):
+    """
+    Обратная связь от пользователя, принимаем сообщение о пожелании и сохраняем его
+    """
+    await state.finish()
+    user_id = message.from_user.id
+    feed = Feedback(user_id, message.text)
+    await feed.save()
+    await message.answer("Пожелание добавлено")
+
+
+# message - text, state - Feedback.bug
+async def bug_text(message: types.Message, state: FSMContext):
+    """
+    Обратная связь от пользователя, принимаем сообщение об ошибке и сохраняем его
+    """
+    await state.finish()
+    user_id = message.from_user.id
+    feed = Feedback(user_id, message.text, bug=True)
+    await feed.save()
+    await message.reply("Сообщение об ошибке добавлено, спасибо за обратную связь!")

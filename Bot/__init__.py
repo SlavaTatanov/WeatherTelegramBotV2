@@ -49,6 +49,14 @@ class UserPlaces(StatesGroup):
     place_del_name = State()
 
 
+class Feedback(StatesGroup):
+    """
+    Состояния для добавления фидбека
+    """
+    feature = State()
+    bug = State()
+
+
 # Регистрация handlers
 
 # -- weather --
@@ -95,6 +103,8 @@ dp.register_callback_query_handler(view_settings.feedback_bag,
 dp.register_callback_query_handler(view_settings.feedback_feature,
                                    lambda callback: callback.data == SETTINGS_FEED_FEATURE,
                                    state="*")
+dp.register_message_handler(view_settings.feedback_text, content_types=['text'], state=Feedback.feature)
+dp.register_message_handler(view_settings.bug_text, content_types=['text'], state=Feedback.bug)
 
 # -- admin --
 dp.register_callback_query_handler(view_admin.admin_menu,

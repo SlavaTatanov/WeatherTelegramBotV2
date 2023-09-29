@@ -177,9 +177,12 @@ class Feedback(BaseModel):
     """
     Модель, описывающая обратную связь от пользователей
     """
-    def __init__(self, user_id: int, kind: str, msg: str) -> None:
+    def __init__(self, user_id: int, msg: str, bug: bool = False) -> None:
         super().__init__("feedback")
-        self._id = user_id
-        self.kind = kind
-        self.date = date.today()
+        self.user = user_id
+        if bug:
+            self.feed_type = "bug"
+        else:
+            self.feed_type = "feature"
+        self.date = str(date.today())
         self.msg = msg
