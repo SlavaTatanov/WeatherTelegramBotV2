@@ -3,14 +3,14 @@ from aiohttp import ClientSession
 from async_lru import alru_cache
 from Bot.utils import req_counter
 from copy import deepcopy
-from Bot.CALLBACKS import SHORT
+from Bot.callbacks import SHORT
 
 
 class Weather:
     """
     Класс описывающий данные о погоде.
-    Получить погоду на сегодня Weather.current_weather()
-    Получить погоду на завтра Weather.tomorrow_weather()
+    Получить погоду на сегодня weather.current_weather()
+    Получить погоду на завтра weather.tomorrow_weather()
     """
     def __init__(self, coord, cur_date, weather_type, place_name=None):
         self.coord = coord

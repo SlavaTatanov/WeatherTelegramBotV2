@@ -4,7 +4,7 @@ from Bot.keboards import (inline_settings_menu, inline_settings_places, inline_s
 import Bot
 from Bot.utils import state_clean_with_messages, state_save_related_msg
 from aiogram.dispatcher import FSMContext
-from Bot.Database.models import UserInfo, Feedback
+from Bot.database.models import UserInfo, Feedback
 
 
 # /settings

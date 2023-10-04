@@ -1,6 +1,6 @@
 import unittest
 from mongomock_motor import AsyncMongoMockClient
-from Bot.Database.models import BaseModel, UserInfo, BotLogInfo, Feedback
+from Bot.database.models import BaseModel, UserInfo, BotLogInfo, Feedback
 
 
 class TestDataBaseModel(unittest.TestCase):

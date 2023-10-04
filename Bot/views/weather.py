@@ -3,9 +3,9 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from Bot.utils import state_clean_with_messages, state_save_related_msg
 from Bot.keboards import inline_get_weather_type, inline_get_weather_places, inline_weather_type, replay_get_location
-from Bot.CALLBACKS import CURRENT, TOMORROW, WEEKEND, SHORT, FIVE_DAY
-from Bot.Database.models import UserInfo
-from Bot.Weather.core import Weather
+from Bot.callbacks import CURRENT, TOMORROW, WEEKEND, SHORT, FIVE_DAY
+from Bot.database.models import UserInfo
+from Bot.weather.core import Weather
 
 
 # /weather

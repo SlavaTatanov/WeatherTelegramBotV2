@@ -1,7 +1,7 @@
 import asyncio
-from Bot.Weather.core import req_counter
-from Bot.Weather.core import Weather
-from Bot.Database.models import BotLogInfo
+from Bot.weather.core import req_counter
+from Bot.weather.core import Weather
+from Bot.database.models import BotLogInfo
 from datetime import datetime
 
 

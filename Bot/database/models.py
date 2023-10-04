@@ -1,4 +1,4 @@
-from Bot.Database import mongo_db
+from Bot.database import mongo_db
 from datetime import date
 import re
 

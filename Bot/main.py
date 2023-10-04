@@ -1,9 +1,9 @@
 from aiogram import types
 import asyncio
 from Bot import dp, set_commands
-from Bot.CALLBACKS import EXIT
+from Bot.callbacks import EXIT
 from Bot.background_task import back_task
-from Bot.Database import create_indexes
+from Bot.database import create_indexes
 from Bot.geocoder.geocoder import get_place_coord
 
 

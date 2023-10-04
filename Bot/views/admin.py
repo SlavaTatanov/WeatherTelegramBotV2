@@ -1,6 +1,6 @@
 from aiogram import types
 from Bot.keboards import inline_admin_menu, inline_admin_api_log
-from Bot.Database.models import BotLogInfo
+from Bot.database.models import BotLogInfo
 
 
 # callback "admin-panel"

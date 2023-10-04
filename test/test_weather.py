@@ -1,7 +1,7 @@
 import unittest
-from Bot.Weather.core import Weather
+from Bot.weather.core import Weather
 from datetime import date
-from Bot.CALLBACKS import CURRENT
+from Bot.callbacks import CURRENT
 
 
 class TestWeather(unittest.TestCase):
