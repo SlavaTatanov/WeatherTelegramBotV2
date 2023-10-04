@@ -75,6 +75,8 @@ dp.register_callback_query_handler(view_weather.current_place_from_user,
                                    state=WeatherState.weather_place)
 dp.register_message_handler(view_weather.weather_place, content_types=['location'],
                             state=WeatherState.weather_place)
+dp.register_message_handler(view_weather.weather_text_place, content_types=['text'],
+                            state=WeatherState.weather_place)
 
 # -- settings --
 dp.register_message_handler(view_settings.settings_menu, commands=["settings"], state="*")

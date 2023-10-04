@@ -6,6 +6,7 @@ from Bot.keboards import inline_get_weather_type, inline_get_weather_places, inl
 from Bot.callbacks import CURRENT, TOMORROW, WEEKEND, SHORT, FIVE_DAY
 from Bot.database.models import UserInfo
 from Bot.weather.core import Weather
+from Bot.geocoder.geocoder import get_place_coord
 
 
 # /weather
@@ -50,7 +51,7 @@ async def weather_time(callback: types.CallbackQuery, state: FSMContext):
         user_id = callback.from_user.id
         user = await UserInfo.get_user(user_id)
         places = user.get_places_names()
-        await callback.message.edit_text("Отправьте гео-позицию или выберете из списка",
+        await callback.message.edit_text("Напишите место, отправьте гео-позицию или выберете из списка",
                                          reply_markup=inline_get_weather_places(places))
 
 
@@ -67,7 +68,7 @@ async def weather_type(callback: types.CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     user = await UserInfo.get_user(user_id)
     places = user.get_places_names()
-    await callback.message.edit_text("Отправьте гео-позицию или выберете из списка",
+    await callback.message.edit_text("Напишите место, отправьте гео-позицию или выберете из списка",
                                      reply_markup=inline_get_weather_places(places))
 
 
@@ -148,3 +149,38 @@ async def weather_place(message: types.Message, state: FSMContext):
 
     await message.delete()
     await state.finish()
+
+
+# text_place
+async def weather_text_place(message: types.Message, state: FSMContext):
+    place_info = await get_place_coord(message.text)
+    if place_info:
+        # Берем координаты и отправляем место
+        lat, lon = place_info['lat'], place_info['lon']
+        msg_loc = await Bot.bot.send_location(message.from_user.id, lat, lon)
+
+        async with state.proxy() as data:
+            res = Weather((lat, lon), data["start_date"], data["type"], place_name=place_info['place'])
+
+            # Отвечаем юзеру в зависимости от типа погоды
+            if data["weather_time"] == CURRENT:
+                res_msg = await res.current_weather()
+                await msg_loc.reply(res_msg)
+            elif data["weather_time"] == TOMORROW:
+                res_msg = await res.tomorrow_weather()
+                await msg_loc.reply(res_msg)
+            elif data["weather_time"] == FIVE_DAY:
+                async for msg in res.five_day_weather():
+                    await msg_loc.reply(msg)
+            elif data["weather_time"] == WEEKEND:
+                async for msg in res.weekend_weather():
+                    await msg_loc.reply(msg)
+            else:
+                await message.answer("Что то пошло не так!")
+
+        await message.delete()
+        await state.finish()
+    else:
+        await message.answer("Ошибка")
+
+

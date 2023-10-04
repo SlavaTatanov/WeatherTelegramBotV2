@@ -19,7 +19,10 @@ async def get_place_coord(place_name: str, api_key: str = YANDEX_GEOCODER_KEY) -
             if response.status == 200:
                 res = await response.json()
                 # Получаем первый найденный объект
-                first_obj = res["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+                try:
+                    first_obj = res["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+                except IndexError:
+                    return None
                 # Берем его координаты, название места и возвращаем юзеру
                 coord = first_obj['Point']["pos"].split()
                 place_descr = first_obj['metaDataProperty']['GeocoderMetaData']['AddressDetails']['Country']
