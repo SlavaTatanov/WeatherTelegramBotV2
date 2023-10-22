@@ -1,10 +1,12 @@
 from aiogram import types
 from Bot.keboards import (inline_settings_menu, inline_settings_places, inline_settings_feedback,
-                          inline_places, inline_places_del, inline_places_del_confirm, inline_feedback_cancel)
+                          inline_places, inline_places_del, inline_places_del_confirm, inline_feedback_cancel,
+                          inline_find_places, inline_place_confirm)
 import Bot
 from Bot.utils import state_clean_with_messages, state_save_related_msg
 from aiogram.dispatcher import FSMContext
 from Bot.database.models import UserInfo, Feedback
+from Bot.geocoder.geocoder import get_place_coord
 
 
 # /settings
@@ -56,10 +58,45 @@ async def settings_place_add(callback: types.CallbackQuery):
 
 # message - text, state - UserPlaces.places_add
 async def settings_place_add_coord(message: types.Message, state: FSMContext):
-    await message.answer(f'Отправьте гео-позицию места для "{message.text}"', reply_markup=inline_places())
+    await message.answer(f'Отправьте гео-позицию места для "{message.text}" либо нажмите кнопку найти место',
+                         reply_markup=inline_find_places())
     await Bot.UserPlaces.places_add_coord.set()
     async with state.proxy() as data:
         data['place_name'] = message.text
+
+
+# callback - SETTINGS_PLC_FIND
+async def settings_place_find(callback: types.CallbackQuery, state: FSMContext):
+    """
+    Запрос подтверждения, что выбранное место верное.
+    """
+    async with state.proxy() as data:
+        place_name = data['place_name']
+        place_info = await get_place_coord(place_name)
+        if place_info:
+            lat, lon, place_full_name = place_info['lat'], place_info['lon'], place_info['place']
+            msg = await Bot.bot.send_location(callback.from_user.id, lat, lon)
+            # Запоминаем координаты
+            data['lat'], data['lon'] = lat, lon
+            await msg.reply(f"{place_full_name}\nЭто верное место?", reply_markup=inline_place_confirm())
+            await Bot.UserPlaces.place_confirm.set()
+        else:
+            await callback.message.answer("Место не найдено, введите его заново", reply_markup=inline_places())
+            await callback.message.delete()
+            await Bot.UserPlaces.places_add.set()
+
+
+# callback - SETTINGS_PLC_RIGHT, state - UserPlaces.place_confirm
+async def settings_place_confirm(callback: types.CallbackQuery, state: FSMContext):
+    user_id = callback.from_user.id
+    async with state.proxy() as data:
+        lat, lon, place_name = data['lat'], data['lon'], data['place_name']
+        # Добавляем место
+        user_info = await UserInfo.get_user(user_id)
+        user_info.add_place(place_name, (lat, lon))
+        await user_info.save()
+        await state_clean_with_messages(user_id)
+        await callback.message.answer(f"Место {place_name} добавлено")
 
 
 # message - location, state - UserPlaces.places_add_coord
