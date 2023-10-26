@@ -35,6 +35,9 @@ ADMIN_MENU = "admin-panel"
 ADMIN_API_LOG = "api_log"
 ADMIN_API_LOG_5 = "api_log_5_days"
 ADMIN_API_LOG_MAX = "api_log_max"
+ADMIN_FEEDBACK = "admin_feedback"
+ADMIN_FEEDBACK_FEED = "admin_feedback_feed"
+ADMIN_FEEDBACK_BUG = "admin_feedback_bug"
 
 # Общие
 EXIT = "exit"

@@ -4,9 +4,10 @@ from aiogram import types
 from Bot.callbacks import CURRENT, FIVE_DAY, WEEKEND, SHORT, COMMON, TOMORROW, CURRENT_PLACE, ADMIN_MENU, \
     ADMIN_API_LOG, EXIT, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, SETTINGS_PLACES, SETTINGS_FEEDBACK, \
     SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_FEED_BAG, SETTINGS_FEED_FEATURE, SETTINGS_PLC_DEL_CONFIRM, \
-    SETTINGS_PLC_FIND, SETTINGS_PLC_RIGHT, SETTINGS_PLC_NO
+    SETTINGS_PLC_FIND, SETTINGS_PLC_RIGHT, SETTINGS_PLC_NO, ADMIN_FEEDBACK
 from Bot.config import OWNERS
 from Bot.utils import is_sunday
+from Bot import callbacks
 
 
 def replay_get_location() -> types.ReplyKeyboardMarkup:
@@ -77,11 +78,27 @@ def inline_admin_menu():
     """
     Меню админа:
     - Логи запросов к API
+    - Фидбек пользователей
     - Выход
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton("Логи-запросов к API", callback_data=ADMIN_API_LOG))
+    keyboard.add(types.InlineKeyboardButton("Фидбек пользователей", callback_data=ADMIN_FEEDBACK))
     keyboard.add(types.InlineKeyboardButton("Назад", callback_data=SETTINGS))
+    return keyboard
+
+
+def inline_admin_feedback_type():
+    """
+    Меню выбора фидбека
+    - Пожелания
+    - Баги
+    - Назад
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton("Пожелания", callback_data=callbacks.ADMIN_FEEDBACK_FEED))
+    keyboard.add(types.InlineKeyboardButton("Баги", callback_data=callbacks.ADMIN_FEEDBACK_BUG))
+    keyboard.add(types.InlineKeyboardButton("Назад", callback_data=ADMIN_MENU))
     return keyboard
 
 

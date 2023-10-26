@@ -10,7 +10,8 @@ import Bot.views.weather as view_weather
 from Bot.callbacks import ADMIN_MENU, ADMIN_API_LOG, ADMIN_API_LOG_5, ADMIN_API_LOG_MAX, SETTINGS, \
     SETTINGS_PLACES, SETTINGS_FEEDBACK, SETTINGS_PLC_ADD, SETTINGS_PLC_DEL, SETTINGS_PLC_DEL_CONFIRM, WEATHER_TIMES, \
     FREQUENCY, CURRENT_PLACE, SETTINGS_FEED_BAG, SETTINGS_FEED_FEATURE, SETTINGS_PLC_FIND, SETTINGS_PLC_RIGHT, \
-    SETTINGS_PLC_NO
+    SETTINGS_PLC_NO, ADMIN_FEEDBACK
+import Bot.callbacks as bot_callbacks
 
 
 def get_token() -> str:
@@ -125,6 +126,14 @@ dp.register_callback_query_handler(view_admin.admin_api_log_5_day,
                                    lambda callback: callback.data == ADMIN_API_LOG_5, state="*")
 dp.register_callback_query_handler(view_admin.admin_api_log_max,
                                    lambda callback: callback.data == ADMIN_API_LOG_MAX, state="*")
+dp.register_callback_query_handler(view_admin.admin_feedback,
+                                   lambda callback: callback.data == ADMIN_FEEDBACK, state="*")
+dp.register_callback_query_handler(view_admin.admin_feedback_feed_choice,
+                                   lambda callback: callback.data == bot_callbacks.ADMIN_FEEDBACK_FEED,
+                                   state="*")
+dp.register_callback_query_handler(view_admin.admin_feedback_bug_choice,
+                                   lambda callback: callback.data == bot_callbacks.ADMIN_FEEDBACK_BUG,
+                                   state="*")
 
 
 async def set_commands(disp: Dispatcher):

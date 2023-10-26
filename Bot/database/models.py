@@ -177,7 +177,7 @@ class Feedback(BaseModel):
     """
     Модель, описывающая обратную связь от пользователей
     """
-    def __init__(self, user_id: int, msg: str, bug: bool = False) -> None:
+    def __init__(self, user_id: int, msg: str, bug: bool = False, open_status: bool = True) -> None:
         super().__init__("feedback")
         self.user = user_id
         if bug:
@@ -186,3 +186,4 @@ class Feedback(BaseModel):
             self.feed_type = "feature"
         self.date = str(date.today())
         self.msg = msg
+        self.open_status = open_status
