@@ -199,3 +199,24 @@ def inline_place_confirm():
     keyboard.add(types.InlineKeyboardButton("Да", callback_data=SETTINGS_PLC_RIGHT))
     keyboard.add(types.InlineKeyboardButton("Нет", callback_data=SETTINGS_PLC_ADD))
     return keyboard
+
+
+def inline_feed_list(feed: list, prev_page: int | None = None, next_page: int | None = None):
+    """
+    Клавиатура с багами
+    """
+    keyboard = types.InlineKeyboardMarkup()
+    for item in feed:
+        keyboard.add(types.InlineKeyboardButton("Баг " + str(item["counter"]), callback_data=f"CALLBACK_ID {item['id']}"))
+    prev_call = callbacks.ADMIN_FEEDBACK_BUG + "_prev"
+    prev_page_btn = types.InlineKeyboardButton("⬅️", callback_data=prev_call)
+    next_call = callbacks.ADMIN_FEEDBACK_BUG + "_next"
+    next_page_btn = types.InlineKeyboardButton("➡️", callback_data=next_call)
+    if prev_page and not next_page:
+        keyboard.add(prev_page_btn)
+    elif not prev_page and next_page:
+        keyboard.add(next_page_btn)
+    elif prev_page and next_page:
+        keyboard.row(prev_page_btn, next_page_btn)
+    keyboard.add(types.InlineKeyboardButton("Назад", callback_data=callbacks.ADMIN_FEEDBACK))
+    return keyboard

@@ -187,3 +187,32 @@ class Feedback(BaseModel):
         self.date = str(date.today())
         self.msg = msg
         self.open_status = open_status
+
+    @staticmethod
+    async def get_feed(type_feed):
+        """
+        Запрашиваем фидбеки
+        """
+        query = []
+        res = dict()
+        query_res = BaseModel.DB["feedback"].find({"feed_type": type_feed})
+        async for feed in query_res:
+            query.append(feed)
+        # Составляем словарь с результатами и делим на страницы
+        page = 0
+        page_counter = 0
+        total_counter = 1
+        for item in query:
+            if page_counter < 5:
+                pass
+            else:
+                page += 1
+                page_counter = 0
+            if page not in res:
+                res[page] = [{"id": str(item["_id"]), "counter": total_counter}]
+            else:
+                res[page].append({"id": str(item["_id"]), "counter": total_counter})
+            page_counter += 1
+            total_counter += 1
+        return res
+

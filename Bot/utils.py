@@ -1,5 +1,6 @@
 from datetime import date
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import StatesGroupMeta
 from aiogram import types
 import Bot
 from aiogram.utils.exceptions import MessageToDeleteNotFound
@@ -51,3 +52,10 @@ async def state_save_related_msg(state: FSMContext, msg: types.Message):
     async with state.proxy() as data:
         # Запоминаем сообщение, потом удалим
         data["msg"] = msg
+
+
+async def check_state(current_state: str, checking_state: StatesGroupMeta) -> bool:
+    """
+    Проверить что состояние
+    """
+    return checking_state.__name__ in current_state

@@ -60,6 +60,15 @@ class Feedback(StatesGroup):
     bug = State()
 
 
+class TestState(StatesGroup):
+    # Тестовое состояние, просто для проверок
+    curr_state = State()
+
+
+class FeedPages(StatesGroup):
+    page_counter = State()
+
+
 # Регистрация handlers
 
 # -- weather --
@@ -132,7 +141,7 @@ dp.register_callback_query_handler(view_admin.admin_feedback_feed_choice,
                                    lambda callback: callback.data == bot_callbacks.ADMIN_FEEDBACK_FEED,
                                    state="*")
 dp.register_callback_query_handler(view_admin.admin_feedback_bug_choice,
-                                   lambda callback: callback.data == bot_callbacks.ADMIN_FEEDBACK_BUG,
+                                   lambda callback: bot_callbacks.ADMIN_FEEDBACK_BUG in callback.data,
                                    state="*")
 
 
