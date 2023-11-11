@@ -37,7 +37,7 @@ ADMIN_API_LOG_5 = "api_log_5_days"
 ADMIN_API_LOG_MAX = "api_log_max"
 ADMIN_FEEDBACK = "admin_feedback"
 ADMIN_FEEDBACK_FEED = "admin_feedback_feed"
-ADMIN_FEEDBACK_BUG = "admin_feedback_bug"
+ADMIN_CALLBACK_ID = "callback_id"
 
 # Общие
 EXIT = "exit"

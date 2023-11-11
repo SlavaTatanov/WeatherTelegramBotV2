@@ -1,6 +1,7 @@
 from Bot.database import mongo_db
 from datetime import date
 import re
+from bson.objectid import ObjectId
 
 
 class BaseModel:
@@ -216,3 +217,8 @@ class Feedback(BaseModel):
             total_counter += 1
         return res
 
+    @classmethod
+    async def get_single_feed(cls, feed_id) -> str:
+        query = await cls.DB["feedback"].find_one({"_id": ObjectId(feed_id)})
+        msg = query["date"] + "\n\n" + query["msg"]
+        return msg

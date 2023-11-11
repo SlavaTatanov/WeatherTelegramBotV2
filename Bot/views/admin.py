@@ -4,7 +4,7 @@ from aiogram.dispatcher.storage import FSMContext
 import Bot
 from Bot.keboards import inline_admin_menu, inline_admin_api_log, inline_admin_feedback_type
 from Bot.database.models import BotLogInfo, Feedback
-from Bot import keboards
+from Bot import keboards, callbacks
 from Bot.utils import state_clean_with_messages, check_state
 
 
@@ -48,15 +48,6 @@ async def admin_feedback(callback: types.CallbackQuery):
 
 
 # callback "admin_feedback_feed"
-async def admin_feedback_feed_choice(callback: types.CallbackQuery):
-    """
-    Представление реализует запрос пожеланий пользователей
-    """
-    await callback.message.edit_text("Запрос пожеланий пользователей")
-    await Feedback.get_feed("feature")
-
-
-# callback "admin_feedback_bug"
 async def admin_feedback_bug_choice(callback: types.CallbackQuery, state: FSMContext):
     """
     Представление реализует запрос багов
@@ -106,7 +97,15 @@ async def admin_feedback_bug_choice(callback: types.CallbackQuery, state: FSMCon
                                                                                         next_page=next_page))
 
     else:
-        feed_list = await Feedback.get_feed("bug")
+        """
+        Если не установлено текущего состояния для страниц
+        """
+        feed_type = "Баг"
+        if "bug" in callback.data:
+            feed_list = await Feedback.get_feed("bug")
+        elif "feed":
+            feed_list = await Feedback.get_feed("feature")
+            feed_type = "Пожелание"
         if len(feed_list) > 1:
             # Ситуация когда страниц несколько и пока нет состояния.
             # Устанавливаем состояние.
@@ -124,6 +123,18 @@ async def admin_feedback_bug_choice(callback: types.CallbackQuery, state: FSMCon
                 data["curr_page"] = 0
             await callback.message.edit_text("Запрос багов добавленных пользователями",
                                              reply_markup=keboards.inline_feed_list(feed_list[0],
-                                                                                    next_page=next_page))
+                                                                                    next_page=next_page,
+                                                                                    feed_type=feed_type))
+        else:
+            # Ситуация когда страница только одна
+            await callback.message.edit_text("Пожелания пользователей",
+                                             reply_markup=keboards.inline_feed_list(feed_list[0],
+                                                                                    feed_type=feed_type))
 
 
+# callback "callback_id <id>"
+async def get_callback(callback: types.CallbackQuery, state: FSMContext):
+    callback_id = callback.data.replace(callbacks.ADMIN_CALLBACK_ID, "")
+    feed_text = await Feedback.get_single_feed(callback_id)
+    await callback.message.edit_text(feed_text)
+    await state_clean_with_messages(callback.from_user.id)

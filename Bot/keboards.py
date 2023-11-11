@@ -96,8 +96,10 @@ def inline_admin_feedback_type():
     - Назад
     """
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton("Пожелания", callback_data=callbacks.ADMIN_FEEDBACK_FEED))
-    keyboard.add(types.InlineKeyboardButton("Баги", callback_data=callbacks.ADMIN_FEEDBACK_BUG))
+    feed = callbacks.ADMIN_FEEDBACK_FEED + "_feed"
+    keyboard.add(types.InlineKeyboardButton("Пожелания", callback_data=feed))
+    bug = callbacks.ADMIN_FEEDBACK_FEED + "_bug"
+    keyboard.add(types.InlineKeyboardButton("Баги", callback_data=bug))
     keyboard.add(types.InlineKeyboardButton("Назад", callback_data=ADMIN_MENU))
     return keyboard
 
@@ -201,16 +203,18 @@ def inline_place_confirm():
     return keyboard
 
 
-def inline_feed_list(feed: list, prev_page: int | None = None, next_page: int | None = None):
+def inline_feed_list(feed: list, prev_page: int | None = None, next_page: int | None = None, feed_type: str = "Баг"):
     """
     Клавиатура с багами
     """
     keyboard = types.InlineKeyboardMarkup()
     for item in feed:
-        keyboard.add(types.InlineKeyboardButton("Баг " + str(item["counter"]), callback_data=f"CALLBACK_ID {item['id']}"))
-    prev_call = callbacks.ADMIN_FEEDBACK_BUG + "_prev"
+        callback_data = callbacks.ADMIN_CALLBACK_ID + item['id']
+        keyboard.add(types.InlineKeyboardButton(feed_type + " " + str(item["counter"]),
+                                                callback_data=callback_data))
+    prev_call = callbacks.ADMIN_FEEDBACK_FEED + "_prev"
     prev_page_btn = types.InlineKeyboardButton("⬅️", callback_data=prev_call)
-    next_call = callbacks.ADMIN_FEEDBACK_BUG + "_next"
+    next_call = callbacks.ADMIN_FEEDBACK_FEED + "_next"
     next_page_btn = types.InlineKeyboardButton("➡️", callback_data=next_call)
     if prev_page and not next_page:
         keyboard.add(prev_page_btn)

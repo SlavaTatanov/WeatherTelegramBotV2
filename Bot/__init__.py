@@ -137,11 +137,11 @@ dp.register_callback_query_handler(view_admin.admin_api_log_max,
                                    lambda callback: callback.data == ADMIN_API_LOG_MAX, state="*")
 dp.register_callback_query_handler(view_admin.admin_feedback,
                                    lambda callback: callback.data == ADMIN_FEEDBACK, state="*")
-dp.register_callback_query_handler(view_admin.admin_feedback_feed_choice,
-                                   lambda callback: callback.data == bot_callbacks.ADMIN_FEEDBACK_FEED,
-                                   state="*")
 dp.register_callback_query_handler(view_admin.admin_feedback_bug_choice,
-                                   lambda callback: bot_callbacks.ADMIN_FEEDBACK_BUG in callback.data,
+                                   lambda callback: bot_callbacks.ADMIN_FEEDBACK_FEED in callback.data,
+                                   state="*")
+dp.register_callback_query_handler(view_admin.get_callback,
+                                   lambda callback: bot_callbacks.ADMIN_CALLBACK_ID in callback.data,
                                    state="*")
 
 
